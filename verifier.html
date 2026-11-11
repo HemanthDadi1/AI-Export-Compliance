@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verifier pack</title>
+<style>
+  :root { --ink:#1b1f24; --mute:#5b6570; --line:#dde2e7; --bg:#f6f7f9; --card:#fff; --ok:#0f7b4d; --bad:#b4501a; --acc:#1d5fa8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui, sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width:1000px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:17px; margin:0 0 10px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:16px; overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--mute); font-weight:600; } td.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  button, .btn { font:inherit; padding:7px 14px; border-radius:6px; border:1px solid var(--acc); background:var(--acc); color:#fff; cursor:pointer; text-decoration:none; display:inline-block; }
+  .ghost { background:#fff; color:var(--acc); }
+  .stats { display:flex; gap:28px; flex-wrap:wrap; } .stats span { display:block; color:var(--mute); font-size:13px; }
+  .big { font-size:26px; font-weight:700; } .note { color:var(--mute); font-size:13px; } .err { color:var(--bad); }
+  .src { font-size:13px; color:var(--mute); margin-bottom:4px; } .role { font-weight:600; color:var(--ink); }
+  .tag { font-size:12px; padding:2px 8px; border-radius:10px; font-weight:600; white-space:nowrap; }
+  .actual { background:#e3f4ec; color:var(--ok); } .default { background:#fbeadf; color:var(--bad); }
+  a { color:var(--acc); }
+  @media print { .noprint { display:none; } body { background:#fff; } section { border:none; padding:0; } tr { break-inside:avoid; } }
+  @media (max-width:640px) { .stats { gap:16px; } .big { font-size:22px; } table { font-size:13px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Verifier pack</h1>
+  <p class="note" id="draft"></p>
+  <div class="row noprint" style="margin-bottom:16px">
+    <label>Year <select id="year"></select></label>
+    <button id="print">Print or save as PDF</button>
+    <a class="btn ghost" id="csv" href="/api/export">Download CSV</a>
+    <a class="btn ghost" href="/">Back to the app</a>
+  </div>
+  <div id="out"></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const f = (x, d = 2) => Number(x).toLocaleString("en-IN", {maximumFractionDigits:d, minimumFractionDigits:d});
+
+for (let y = 2026; y <= 2034; y++) $("year").add(new Option(y, y, false, y === 2027));
+const wanted = new URLSearchParams(location.search).get("year");
+if (wanted) $("year").value = wanted;
+$("year").onchange = load;
+$("print").onclick = () => window.print();
+
+function source(s) {
+  const name = s.doc ? `<a href="/api/doc?id=${encodeURIComponent(s.doc)}" target="_blank">${esc(s.file)}</a>` : esc(s.file);
+  return `<div class="src"><span class="role">${esc(s.role)}:</span> ${name} “${esc(s.quote)}”</div>`;
+}
+
+async function load() {
+  const y = $("year").value;
+  $("csv").href = `/api/export?year=${y}`;
+  const a = await (await fetch(`/api/audit?year=${y}`)).json();
+  if (a.empty) { $("out").innerHTML = `<section><p>No data yet. Upload documents in the app first. A production record is needed for output tonnes.</p></section>`; return; }
+  $("draft").textContent = a.draft;
+  const s = a.summary;
+  const open = [...a.checks.map(c => ["err", c]), ...a.plan.gaps.map(g => ["", g])];  // plan gaps already list unmatched heats
+  $("out").innerHTML = `
+    <section><h2>${esc(s.name)}, reporting year ${esc(s.year)}</h2>
+      <div class="stats">
+        <div><span>Embedded emissions</span><b class="big">${f(s.see_total)}</b> tCO2/t</div>
+        <div><span>Own direct (furnaces)</span><b class="big">${f(s.see_direct)}</b></div>
+        <div><span>Purchased steel</span><b class="big">${f(s.see_precursor)}</b></div>
+        <div><span>Output</span><b class="big">${f(s.output_t, 0)}</b> t</div>
+        <div><span>Steel on verified mill data</span><b class="big">${f(s.verified_share * 100, 0)}%</b></div>
+      </div>
+      <p class="note">CN 7318, goods made from purchased wire rod. ${esc(a.default_note)}</p></section>
+    <section><h2>Open checks and gaps (${open.length})</h2>
+      ${open.length ? `<ul>${open.map(([c, t]) => `<li class="${c}">${esc(t)}</li>`).join("")}</ul>` : `<p class="note">None found by these rules.</p>`}</section>
+    <section><h2>Method</h2><ul>${a.method.map(l => `<li>${esc(l)}</li>`).join("")}</ul></section>
+    <section><h2>Every figure and where it came from (${a.rows.length})</h2>
+      <table><tr><th>Item</th><th class="n">tCO2</th><th>Basis</th><th>Sources</th></tr>
+      ${a.rows.map(r => `<tr><td>${esc(r.item)}</td><td class="n">${r.tco2 == null ? "" : f(r.tco2, 1)}</td>
+        <td>${r.basis ? `<span class="tag ${r.basis.startsWith("default") ? "default" : "actual"}">${esc(r.basis)}</span>` : ""}</td>
+        <td>${r.sources.map(source).join("")}</td></tr>`).join("")}</table></section>`;
+}
+load();
+</script>
+</body>
+</html>

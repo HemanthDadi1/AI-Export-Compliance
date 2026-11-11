@@ -1,0 +1,6 @@
+TAX INVOICE
+Document: steel_invoice
+Supplier: Ambattur Steel Traders
+Heat No: KIS-H88457
+Item: Wire rod 5.5 mm SAE 1018, 46 coils
+Steel (t): 180

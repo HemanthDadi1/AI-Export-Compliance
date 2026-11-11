@@ -1,0 +1,8 @@
+MILL TEST CERTIFICATE (EN 10204 3.1)
+Document: mtc
+Supplier: Kaveri Integrated Steel
+Heat No: KIS-H88457
+Product: Wire rod 5.5 mm SAE 1018
+C 0.18  Mn 0.70  Si 0.17  P 0.017  S 0.011
+Quantity: 46 coils
+Customer: Sri Venkateswara Fasteners, Chennai

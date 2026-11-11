@@ -4,6 +4,8 @@ Lets a clerk at a metal plant produce EU carbon-border (CBAM) data for fasteners
 
 **Live demo (static, made-up data):** https://hemanthdadi1.github.io/AI-Export-Compliance/
 
+**Network simulation (our assumptions):** https://hemanthdadi1.github.io/AI-Export-Compliance/simulation.html. It shows how fast verifying mills puts every plant's steel on actual values. `python3 simulate.py` prints a summary and `python3 simulate.py --write` rebuilds the page data.
+
 ## Run
 
 ```bash
@@ -12,6 +14,7 @@ python3 test_calc.py         # calculation tests
 python3 test_capture.py      # monthly log and monitoring plan tests
 python3 test_verifier.py     # verifier pack: every figure has a source
 python3 test_demo_snapshot.py # the Pages demo matches the engine
+python3 test_simulation.py    # the simulation matches the engine
 python3 make_demo_snapshot.py # rebuild the Pages demo in docs/ after a change
 python3 test_match.py        # heat matching tests
 python3 test_extract.py      # Gemini and Vertex requests, offline

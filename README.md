@@ -2,6 +2,8 @@
 
 Lets a clerk at a metal plant produce EU carbon-border (CBAM) data for fasteners (CN 7318) that a verifier can check. AI reads the documents. Rules do the calculation. The app also drafts the monitoring plan and lists the gaps still open. A mill verified once serves every plant that buys from it.
 
+**Live demo (static, made-up data):** https://hemanthdadi1.github.io/AI-Export-Compliance/
+
 ## Run
 
 ```bash
@@ -9,6 +11,8 @@ python3 server.py            # open http://localhost:8000
 python3 test_calc.py         # calculation tests
 python3 test_capture.py      # monthly log and monitoring plan tests
 python3 test_verifier.py     # verifier pack: every figure has a source
+python3 test_demo_snapshot.py # the Pages demo matches the engine
+python3 make_demo_snapshot.py # rebuild the Pages demo in docs/ after a change
 python3 test_match.py        # heat matching tests
 python3 test_extract.py      # Gemini and Vertex requests, offline
 ```

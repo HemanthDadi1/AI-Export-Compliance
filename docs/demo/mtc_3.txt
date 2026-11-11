@@ -1,0 +1,8 @@
+MILL TEST CERTIFICATE (EN 10204 3.1)
+Document: mtc
+Supplier: Rayalaseema Steel Rolling
+Heat No: RSR-24-0533
+Product: Wire rod 5.5 mm SAE 1018
+C 0.17  Mn 0.72  Si 0.18  P 0.018  S 0.012
+Steel (t): 160
+Customer: Sri Venkateswara Fasteners, Chennai

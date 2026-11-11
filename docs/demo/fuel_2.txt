@@ -1,0 +1,6 @@
+TAX INVOICE
+Document: fuel_invoice
+Supplier: Indane Commercial LPG, Chennai
+Fuel: LPG
+Quantity: 26 t
+Use: heat treatment furnace

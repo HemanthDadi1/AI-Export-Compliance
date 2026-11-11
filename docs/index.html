@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI Compliance Expert: demo</title>
+<style>
+  :root { --ink:#1b1f24; --mute:#5b6570; --line:#dde2e7; --bg:#f6f7f9; --card:#fff; --ok:#0f7b4d; --bad:#b4501a; --acc:#1d5fa8; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui, sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width:1000px; margin:0 auto; padding:24px 16px 64px; }
+  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:17px; margin:0 0 10px; }
+  p.sub { color:var(--mute); margin:0 0 16px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:16px; overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { color:var(--mute); font-weight:600; } td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  button, .btn { font:inherit; padding:8px 16px; border-radius:6px; border:1px solid var(--acc); background:var(--acc); color:#fff; cursor:pointer; text-decoration:none; display:inline-block; }
+  .ghost { background:#fff; color:var(--acc); }
+  .stats { display:flex; gap:28px; flex-wrap:wrap; } .stats span { display:block; color:var(--mute); font-size:13px; }
+  .big { font-size:26px; font-weight:700; } .note { color:var(--mute); font-size:13px; } .err { color:var(--bad); }
+  .src { font-size:13px; color:var(--mute); margin-bottom:4px; } .role { font-weight:600; color:var(--ink); }
+  .tag { font-size:12px; padding:2px 8px; border-radius:10px; font-weight:600; white-space:nowrap; }
+  .actual { background:#e3f4ec; color:var(--ok); } .default { background:#fbeadf; color:var(--bad); }
+  .delta { color:var(--ok); font-weight:600; } .bar { height:10px; border-radius:3px; } .b-def { background:var(--bad); } .b-you { background:var(--acc); }
+  a { color:var(--acc); } .banner { background:#fff8e6; border:1px solid #f0dca0; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:14px; }
+  @media (max-width:640px) { .stats { gap:16px; } .big { font-size:22px; } table { font-size:13px; } button { width:100%; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>AI compliance expert for Indian exporters</h1>
+  <p class="sub">A clerk uploads documents and logs fuel and output. AI reads and matches them. Rules do the calculation. This is a static demo of the result.</p>
+  <div class="banner"><b>Made-up data.</b> Plants, mills and mill values are invented. The steel default (4.3 tCO2/t before the mark-up) comes from a secondary source and is not confirmed. Not an EU-approved calculation. The numbers come from the real engine in this repo. The app itself runs locally: see the <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">repository</a>.</div>
+
+  <section>
+    <h2>1. Make the mill share its data</h2>
+    <p class="note">Four plants buy steel from Rayalaseema Steel Rolling, which has no verified data yet. They are on the EU default plus a penalty.</p>
+    <div class="row">
+      <button id="toggle"></button>
+      <label>Reporting year <select id="year"></select></label>
+    </div>
+    <p id="state" class="note"></p>
+    <div id="plants"></div>
+  </section>
+
+  <section id="result"></section>
+
+  <section>
+    <h2>3. Cost to the EU importer for 1,000 t of your plant's bolts</h2>
+    <div id="curve"></div>
+  </section>
+
+  <p class="note">Source: <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">github.com/HemanthDadi1/AI-Export-Compliance</a>. MIT licensed.</p>
+</main>
+<script src="demo.js"></script>
+<script>
+const D = window.DEMO;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const f = (x, d = 2) => Number(x).toLocaleString("en-GB", {maximumFractionDigits:d, minimumFractionDigits:d});
+const eur = x => "€" + Math.round(x).toLocaleString("en-GB");
+let after = false;
+
+for (let y = 2026; y <= 2034; y++) $("year").add(new Option(y, y, false, y === 2027));
+$("year").onchange = render;
+$("toggle").onclick = () => { after = !after; render(); };
+
+function source(s) {
+  const name = /\.txt$/.test(s.file) ? `<a href="demo/${encodeURIComponent(s.file)}" target="_blank">${esc(s.file)}</a>` : esc(s.file);
+  return `<div class="src"><span class="role">${esc(s.role)}:</span> ${name} “${esc(s.quote)}”</div>`;
+}
+
+function render() {
+  const y = $("year").value, st = D.states[after ? "after" : "before"], Y = st.years[y], base = D.states.before.years[y];
+  $("toggle").textContent = after ? "Undo: mill has no verified data" : `${D.mill} shares verified data (${D.see} tCO2/t)`;
+  $("state").textContent = after ? "The mill's verified value now replaces the default for every plant that buys from it." : "";
+
+  $("plants").innerHTML = `<table><tr><th>Plant</th><th class="n">Steel on verified data</th><th class="n">tCO2/t</th><th class="n">Change</th></tr>
+    ${Y.plants.map((p, i) => { const d = p.see_total / base.plants[i].see_total - 1;
+      return `<tr><td>${esc(p.name)}</td><td class="n">${f(p.verified_share * 100, 0)}%</td><td class="n">${f(p.see_total)}</td>
+        <td class="n">${after && d < -0.005 ? `<span class="delta">${f(d * 100, 0)}%</span>` : ""}</td></tr>`; }).join("")}</table>`;
+
+  const a = Y.audit, s = a.summary;
+  const open = [...a.checks.map(c => ["err", c]), ...a.plan.gaps.map(g => ["", g])];
+  $("result").innerHTML = `<h2>2. Verifier pack for ${esc(s.name)}, ${esc(s.year)}</h2>
+    <div class="stats">
+      <div><span>Embedded emissions</span><b class="big">${f(s.see_total)}</b> tCO2/t</div>
+      <div><span>Own direct (furnaces)</span><b class="big">${f(s.see_direct)}</b></div>
+      <div><span>Purchased steel</span><b class="big">${f(s.see_precursor)}</b></div>
+      <div><span>Output</span><b class="big">${f(s.output_t, 0)}</b> t</div>
+      <div><span>Steel on verified mill data</span><b class="big">${f(s.verified_share * 100, 0)}%</b></div>
+    </div>
+    <p class="note">With the monthly log loaded. ${esc(a.draft)}</p>
+    <h2 style="margin-top:14px">Every figure and where it came from (${a.rows.length})</h2>
+    <table><tr><th>Item</th><th class="n">tCO2</th><th>Basis</th><th>Sources</th></tr>
+    ${a.rows.map(r => `<tr><td>${esc(r.item)}</td><td class="n">${r.tco2 == null ? "" : f(r.tco2, 1)}</td>
+      <td>${r.basis ? `<span class="tag ${r.basis.startsWith("default") ? "default" : "actual"}">${esc(r.basis)}</span>` : ""}</td>
+      <td>${r.sources.map(source).join("")}</td></tr>`).join("")}</table>
+    <h2 style="margin-top:14px">Open checks and gaps (${open.length})</h2>
+    ${open.length ? `<ul>${open.map(([c, t]) => `<li class="${c}">${esc(t)}</li>`).join("")}</ul>` : `<p class="note">None found by these rules.</p>`}`;
+
+  const max = Math.max(...st.curve.map(c => c.default));
+  $("curve").innerHTML = `<table><tr><th>Year</th><th>Steel on default values</th><th class="n"></th><th>Your data</th><th class="n"></th></tr>
+    ${st.curve.map(c => `<tr><td>${c.year}</td>
+      <td style="width:30%"><div class="bar b-def" style="width:${c.default / max * 100}%"></div></td><td class="n">${eur(c.default)}</td>
+      <td style="width:30%"><div class="bar b-you" style="width:${c.yours / max * 100}%"></div></td><td class="n">${eur(c.yours)}</td></tr>`).join("")}
+    <tr><th>Total</th><td></td><th class="n">${eur(st.curve.reduce((t, c) => t + c.default, 0))}</th><td></td><th class="n">${eur(st.curve.reduce((t, c) => t + c.yours, 0))}</th></tr></table>
+    <p class="note">Assumes €75 per tCO2 flat and the payable share rising from 2.5% (2026) to 100% (2034). Default values carry a 10%, 20%, then 30% mark-up.</p>`;
+}
+render();
+</script>
+</body>
+</html>

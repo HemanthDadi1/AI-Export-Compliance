@@ -1,0 +1,6 @@
+TAX INVOICE
+Document: fuel_invoice
+Supplier: Sri Balaji Fuels
+Fuel: Diesel
+Quantity: 12000 litre
+Use: plating line boiler

@@ -72,3 +72,7 @@ The URL is public and has no login. Anyone with it can upload or reset. Share it
 ## Demo data
 
 Everything in `demo/` and `samples/` is synthetic. Do not commit real plant documents.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

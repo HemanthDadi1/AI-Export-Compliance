@@ -4,107 +4,123 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Network simulation</title>
-<style>
-  :root { --ink:#1b1f24; --mute:#5b6570; --line:#dde2e7; --bg:#f6f7f9; --card:#fff; --ok:#0f7b4d; --bad:#b4501a; --acc:#1d5fa8; --band:#cfe0f3; }
-  * { box-sizing: border-box; }
-  body { margin:0; font:15px/1.5 system-ui, sans-serif; color:var(--ink); background:var(--bg); }
-  main { max-width:1000px; margin:0 auto; padding:24px 16px 64px; }
-  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:17px; margin:0 0 10px; }
-  p.sub { color:var(--mute); margin:0 0 16px; }
-  section { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px; margin-bottom:16px; overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; font-size:14px; }
-  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
-  th { color:var(--mute); font-weight:600; } td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
-  .row { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; } label { display:flex; flex-direction:column; gap:2px; font-size:13px; color:var(--mute); }
-  select { font:inherit; padding:7px 8px; border:1px solid var(--line); border-radius:6px; min-height:36px; }
-  .note { color:var(--mute); font-size:13px; } a { color:var(--acc); }
-  .banner { background:#fff8e6; border:1px solid #f0dca0; border-radius:8px; padding:10px 14px; margin-bottom:16px; font-size:14px; }
-  .big { font-size:26px; font-weight:700; } .stats { display:flex; gap:28px; flex-wrap:wrap; margin-bottom:8px; } .stats span { display:block; color:var(--mute); font-size:13px; }
-  svg { width:100%; height:auto; display:block; } svg text { font-size:12px; fill:var(--mute); }
-  .grid { stroke:var(--line); } .axis { stroke:var(--mute); } .line { fill:none; stroke:var(--acc); stroke-width:2.5; } .area { fill:var(--band); }
-  .mark { stroke:var(--bad); stroke-dasharray:4 4; } .mark-t { fill:var(--bad); font-weight:600; }
-  @media (max-width:640px) { .stats { gap:16px; } .big { font-size:22px; } table { font-size:13px; } select { width:100%; } label { width:100%; } }
-</style>
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
-<main>
-  <h1>Network simulation: how fast does verifying mills help every plant?</h1>
-  <p class="sub">Verify a mill once and every plant that buys its steel moves from the EU default to the mill's actual value. This simulation shows how fast that spreads.</p>
-  <div class="banner"><b>Our assumptions, not data.</b> The plants, mills and mill values are invented. The chance a mill joins is the biggest unknown and has not been tested with any real mill. The emissions arithmetic is the real engine in this repo. <a href="index.html">See the demo</a> or the <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">code</a>.</div>
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><div class="mark">EC</div><div><b>Export Compliance</b><span>AI compliance expert · demo</span></div></div>
+    <nav aria-label="Sections">
+      <a href="index.html#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</a>
+      <a href="index.html#plants"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V10l6 4V10l6 4V6l6 4v11z"/></svg>Plants</a>
+      <a href="index.html#verifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Verifier pack</a>
+      <a href="index.html#cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>Cost curve</a>
+      <a class="active" href="simulation.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg>Simulation</a>
+      <a href="https://github.com/HemanthDadi1/AI-Export-Compliance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3"/></svg>Code</a>
+    </nav>
+    <div class="foot">Our assumptions · MIT licensed</div>
+  </aside>
 
-  <section>
-    <h2>Choose a market</h2>
-    <div class="row">
-      <label>How unevenly plants cluster on a few mills
-        <select id="zipf"><option value="spread">Spread out (many mills of similar size)</option><option value="typical" selected>Typical</option><option value="concentrated">Concentrated (a few big mills)</option></select></label>
-      <label>Chance per month that an approached mill joins
-        <select id="join"><option value="slow">10% (slow)</option><option value="medium" selected>25% (medium)</option><option value="fast">50% (fast)</option></select></label>
+  <main class="main">
+    <div class="top">
+      <div><h1>Network simulation</h1><p>How fast does verifying mills put every plant's steel on actual values?</p></div>
     </div>
-    <p class="note" id="summary"></p>
-  </section>
+    <div class="notice"><b>Our assumptions, not data.</b> Plants, mills and mill values are invented. The chance a mill joins is the biggest unknown and has not been tested with any real mill. The emissions arithmetic is the real engine in this repo.</div>
 
-  <section><h2>1. Share of steel on verified mill data, by month</h2><div id="c1"></div>
-    <p class="note">Line: the median of 40 simulated markets. Band: the 10th to 90th percentile.</p></section>
+    <section class="card" style="margin-bottom:16px" aria-label="Choose a market">
+      <div class="controls" style="gap:20px">
+        <div><div class="muted" style="margin-bottom:6px">How plants cluster on mills</div><div class="seg" id="zipf" role="group" aria-label="Mill concentration"></div></div>
+        <div><div class="muted" style="margin-bottom:6px">Chance per month an approached mill joins</div><div class="seg" id="join" role="group" aria-label="Join chance"></div></div>
+      </div>
+    </section>
 
-  <section><h2>2. How many mills cover how much steel</h2><div id="c2"></div>
-    <p class="note">Mills ordered from the largest by tonnes bought. Concentrated markets need fewer mills.</p></section>
+    <div class="kpis" id="kpis"></div>
 
-  <section><h2>3. Key results (median)</h2><div id="tbl"></div></section>
+    <div class="grid2">
+      <section class="card" aria-labelledby="c1-h">
+        <div class="card-head"><div><h2 id="c1-h">Steel on verified mill data</h2><p class="sub">By month. Line: median of 40 markets. Band: 10th to 90th percentile.</p></div></div>
+        <div id="c1"></div>
+      </section>
+      <section class="card" aria-labelledby="c2-h">
+        <div class="card-head"><div><h2 id="c2-h">Mills needed</h2><p class="sub">Share of steel covered, largest mills first</p></div></div>
+        <div id="c2"></div>
+      </section>
+    </div>
 
-  <section><h2>Assumptions</h2><ul id="assume"></ul>
-    <p class="note">Change them in <code>simulate.py</code>, run <code>python3 simulate.py --write</code>, and the test suite tells you if the page is out of date.</p></section>
-</main>
+    <section class="card" style="margin-bottom:16px" aria-labelledby="t-h">
+      <div class="card-head"><div><h2 id="t-h">Results by month</h2><p class="sub">Medians, with the 10th to 90th percentile for steel on verified data</p></div></div>
+      <div class="table-wrap" id="tbl"></div>
+      <p class="muted" id="saveNote"></p>
+    </section>
+
+    <section class="card" aria-labelledby="a-h">
+      <div class="card-head"><div><h2 id="a-h">Assumptions</h2><p class="sub">Change them in simulate.py and run python3 simulate.py --write</p></div></div>
+      <ul class="list" id="assume"></ul>
+    </section>
+  </main>
+</div>
 <script src="simulation.js"></script>
 <script>
-const S = window.SIM, A = S.assumptions;
-const $ = id => document.getElementById(id);
+const S = window.SIM, A = S.assumptions, $ = id => document.getElementById(id);
 const f = (x, d = 0) => Number(x).toLocaleString("en-GB", {maximumFractionDigits:d, minimumFractionDigits:d});
 const pct = x => f(x * 100) + "%";
-const W = 640, H = 280, L = 48, R = 16, T = 16, B = 40;
+const esc = s => String(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+let zipf = "typical", join = "medium";
 
-function frame(xmax, xticks, xlabel) {
-  const x = v => L + (W - L - R) * v / xmax, y = v => H - B - (H - T - B) * v;
-  let g = [0, .25, .5, .75, 1].map(v => `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v * 100}%</text>`).join("");
-  g += xticks.map(t => `<text x="${x(t)}" y="${H - B + 18}" text-anchor="middle">${t}</text>`).join("");
-  g += `<line class="axis" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/><text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">${xlabel}</text>`;
+function seg(id, options, current, set) {
+  $(id).innerHTML = options.map(([v, l]) => `<button type="button" data-v="${v}" aria-pressed="${v === current}">${l}</button>`).join("");
+  $(id).querySelectorAll("button").forEach(b => b.onclick = () => { set(b.dataset.v); render(); });
+}
+
+function frame(W, H, xmax, xticks) {
+  const L = 44, R = 12, T = 12, B = 28, x = v => L + (W - L - R) * v / xmax, y = v => H - B - (H - T - B) * v;
+  let g = [0, .25, .5, .75, 1].map(v => `<line class="gridline" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v * 100}%</text>`).join("");
+  g += xticks.map(t => `<text x="${x(t)}" y="${H - 8}" text-anchor="middle">${t}</text>`).join("");
   return {x, y, g};
 }
 
-function chart1(sc) {
-  const c = frame(A.months, [0, 6, 12, 18, 24], "Months since launch");
-  const up = sc.months.map(m => `${c.x(m.month)},${c.y(m.share.p90)}`), down = sc.months.slice().reverse().map(m => `${c.x(m.month)},${c.y(m.share.p10)}`);
-  const med = sc.months.map(m => `${c.x(m.month)},${c.y(m.share.p50)}`).join(" ");
-  $("c1").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Share of steel on verified mill data by month, median and range">${c.g}
-    <polygon class="area" points="${up.concat(down).join(" ")}"/><polyline class="line" points="${med}"/></svg>`;
-}
-
-function chart2(sc) {
-  const n = sc.coverage.length, c = frame(n, [0, 10, 20, 30, 40].filter(t => t <= n), "Mills verified, largest first");
-  const pts = sc.coverage.map((v, k) => `${c.x(k + 1)},${c.y(v)}`).join(" ");
-  const first = t => sc.coverage.findIndex(v => v >= t) + 1;
-  const marks = [[.5, first(.5)], [.8, first(.8)]].map(([t, k], i) => `<line class="mark" x1="${c.x(k)}" x2="${c.x(k)}" y1="${c.y(0)}" y2="${c.y(t)}"/><text class="mark-t" x="${c.x(k) + 6}" y="${c.y(t) + (i ? 16 : 14)}">${k} mills reach ${t * 100}%</text>`).join("");
-  $("c2").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Share of steel covered as more mills are verified">${c.g}<polyline class="line" points="${pts}"/>${marks}</svg>`;
-  return [first(.5), first(.8)];
+function kpi(label, value, unit, foot) {
+  return `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}<span class="unit">${unit}</span></div><div class="foot">${foot}</div></div>`;
 }
 
 function render() {
-  const sc = S.scenarios[`${$("zipf").value}_${$("join").value}`], m12 = sc.months[12], m24 = sc.months[24];
-  chart1(sc); const [k50, k80] = chart2(sc);
-  $("summary").innerHTML = `In this market, <b>${k80} of ${A.mills} mills</b> cover 80% of the steel. After 12 months a typical run has <b>${pct(m12.share.p50)}</b> of steel on verified data (range ${pct(m12.share.p10)} to ${pct(m12.share.p90)}) and average emissions are <b>${f(m12.drop_pct.p50)}% lower</b> than on defaults.`;
-  $("tbl").innerHTML = `<table><tr><th class="n">Month</th><th class="n">Plants</th><th class="n">Mills verified</th><th class="n">Steel on verified data</th><th class="n">Emissions drop</th><th class="n">CBAM cost saved per plant, ${A.year}</th></tr>
+  seg("zipf", [["spread", "Spread out"], ["typical", "Typical"], ["concentrated", "Concentrated"]], zipf, v => zipf = v);
+  seg("join", [["slow", "10%"], ["medium", "25%"], ["fast", "50%"]], join, v => join = v);
+  const sc = S.scenarios[`${zipf}_${join}`], m12 = sc.months[12], m24 = sc.months[24];
+  const first = t => sc.coverage.findIndex(v => v >= t) + 1, k50 = first(.5), k80 = first(.8);
+
+  $("kpis").innerHTML =
+    kpi("Mills to cover 80% of steel", k80, `of ${A.mills}`, `<span class="pill info">${k50} mills</span> cover half`) +
+    kpi("Steel on verified data, month 12", pct(m12.share.p50), "", `<span class="pill info">${pct(m12.share.p10)}–${pct(m12.share.p90)}</span> range`) +
+    kpi("Emissions drop, month 12", f(m12.drop_pct.p50), "%", `<span class="pill ok">${f(m24.drop_pct.p50)}%</span> by month 24`) +
+    kpi("Mills verified by month 24", m24.mills_verified, `of ${A.mills}`, `${m24.plants} plants on the platform`);
+
+  let c = frame(720, 280, A.months, [0, 6, 12, 18, 24]);
+  const up = sc.months.map(m => `${c.x(m.month)},${c.y(m.share.p90)}`), down = sc.months.slice().reverse().map(m => `${c.x(m.month)},${c.y(m.share.p10)}`);
+  $("c1").innerHTML = `<svg class="chart" viewBox="0 0 720 280" role="img" aria-label="Share of steel on verified mill data by month">${c.g}
+    <polygon class="f-band" points="${up.concat(down).join(" ")}"/><polyline class="s-acc" points="${sc.months.map(m => `${c.x(m.month)},${c.y(m.share.p50)}`).join(" ")}"/></svg>
+    <p class="muted" style="text-align:center;margin:4px 0 0">Months since launch</p>`;
+
+  c = frame(360, 280, A.mills, [0, 10, 20, 30, 40]);
+  const marks = [[.5, k50], [.8, k80]].map(([t, k]) => `<line stroke="var(--bad)" stroke-dasharray="4 4" x1="${c.x(k)}" x2="${c.x(k)}" y1="${c.y(0)}" y2="${c.y(t)}"/><circle class="f-bad" cx="${c.x(k)}" cy="${c.y(t)}" r="4"><title>${k} mills cover ${t * 100}%</title></circle>`).join("");
+  $("c2").innerHTML = `<svg class="chart" viewBox="0 0 360 280" role="img" aria-label="Share of steel covered as more mills are verified">${c.g}
+    <polyline class="s-acc" points="${sc.coverage.map((v, k) => `${c.x(k + 1)},${c.y(v)}`).join(" ")}"/>${marks}</svg>
+    <p class="muted" style="text-align:center;margin:4px 0 0">Mills verified · red marks: 50% and 80%</p>`;
+
+  $("tbl").innerHTML = `<table><thead><tr><th class="n">Month</th><th class="n">Plants</th><th class="n">Mills verified</th><th>Steel on verified data</th><th class="n">Emissions drop</th><th class="n">Importer saving per plant, ${A.year}</th></tr></thead><tbody>
     ${[6, 12, 18, 24].map(i => { const m = sc.months[i]; return `<tr><td class="n">${i}</td><td class="n">${m.plants}</td><td class="n">${m.mills_verified}</td>
-      <td class="n">${pct(m.share.p50)} <span class="note">(${pct(m.share.p10)}–${pct(m.share.p90)})</span></td><td class="n">${f(m.drop_pct.p50)}%</td><td class="n">€${f(m.saving.p50)}</td></tr>`; }).join("")}</table>
-    <p class="note">The saving is for the importer who would otherwise pay on defaults. It uses €${A.eua_price} per tCO2 and a payable share of ${pct(A.payable_share)} in ${A.year}. Our plants do not receive it.</p>`;
+      <td><div style="display:flex;gap:10px;align-items:center"><div class="progress" style="flex:1"><span style="width:${m.share.p50 * 100}%"></span></div><span class="muted">${pct(m.share.p50)} (${pct(m.share.p10)}–${pct(m.share.p90)})</span></div></td>
+      <td class="n">${f(m.drop_pct.p50)}%</td><td class="n">€${f(m.saving.p50)}</td></tr>`; }).join("")}</tbody></table>`;
+  $("saveNote").textContent = `The saving goes to the EU importer who would otherwise pay on defaults, at €${A.eua_price} per tCO2 and a ${pct(A.payable_share)} payable share in ${A.year}. Plants do not receive it directly.`;
 }
 
 $("assume").innerHTML = [
   `${A.plants} plants join evenly over ${A.months} months, buying from ${A.mills} mills (1 to 3 each).`,
   `A plant buys a median of ${A.median_t} t of steel a year, with a wide spread of sizes. It makes ${A.yield} t of bolts per tonne of steel and burns ${A.lpg_per_t} t of LPG per tonne of bolts.`,
-  `A mill is approached once ${A.pull} of our plants buy from it. Each month it joins with the chosen chance, and its verified value is a random ${A.see_lo} to ${A.see_hi} tCO2 per tonne of steel.`,
+  `A mill is approached once ${A.pull} of our plants buy from it. Each month it joins with the chosen chance. Its verified value is a random ${A.see_lo} to ${A.see_hi} tCO2 per tonne of steel.`,
   `Default value: ${A.default_see} tCO2 per tonne before the ${A.year} mark-up (secondary source, unconfirmed). Direct emissions use the same fuel factors as the app.`,
-  `Each scenario is the median of ${A.seeds} random markets. No mill ever refuses, and every verifier accepts mill data. Both are open questions.`,
-].map(t => `<li>${t.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}</li>`).join("");
-$("zipf").onchange = $("join").onchange = render;
+  `Each scenario is the median of ${A.seeds} random markets. No mill refuses, and every verifier accepts mill data. Both are open questions.`,
+].map(t => `<li><span class="dot warn"></span><span>${esc(t)}</span></li>`).join("");
 render();
 </script>
 </body>

@@ -1,23 +1,13 @@
 # AI compliance expert for Indian exporters: MVP
 
-Lets a clerk at a metal plant produce EU carbon-border (CBAM) data for fasteners (CN 7318) that a verifier can check. AI reads the documents. Rules do the calculation. The app also drafts the monitoring plan and lists the gaps still open. A mill verified once serves every plant that buys from it.
+Lets a clerk at a metal plant produce EU carbon-border (CBAM) data for fasteners (CN 7318) that a verifier can check. AI reads the documents. Rules do the calculation. The app drafts the monitoring plan, lists the gaps still open, and creates a carbon compliance report once the required documents are in. A mill verified once serves every plant that buys from it.
 
-**Live demo (static, made-up data):** https://hemanthdadi1.github.io/AI-Export-Compliance/
-
-**Network simulation (our assumptions):** https://hemanthdadi1.github.io/AI-Export-Compliance/simulation.html. It shows how fast verifying mills puts every plant's steel on actual values. `python3 simulate.py` prints a summary and `python3 simulate.py --write` rebuilds the page data.
+**Website:** https://hemanthdadi1.github.io/AI-Export-Compliance/ (homepage, [app](https://hemanthdadi1.github.io/AI-Export-Compliance/app.html), [docs](https://hemanthdadi1.github.io/AI-Export-Compliance/docs.html), [simulation](https://hemanthdadi1.github.io/AI-Export-Compliance/simulation.html)). On the website the app runs the same Python engine in your browser with Pyodide, using made-up sample data.
 
 ## Run
 
 ```bash
-python3 server.py            # open http://localhost:8000
-python3 test_calc.py         # calculation tests
-python3 test_capture.py      # monthly log and monitoring plan tests
-python3 test_verifier.py     # verifier pack: every figure has a source
-python3 test_demo_snapshot.py # the Pages demo matches the engine
-python3 test_simulation.py    # the simulation matches the engine
-python3 make_demo_snapshot.py # rebuild the Pages demo in docs/ after a change
-python3 test_match.py        # heat matching tests
-python3 test_extract.py      # Gemini and Vertex requests, offline
+python3 server.py            # open http://localhost:8000 (homepage) and /app.html (the app)
 ```
 
 No packages needed. Python 3.10+.
@@ -34,7 +24,22 @@ Or with Gemini on Vertex AI in Mumbai (`asia-south1`), so files stay in India:
 VERTEX_PROJECT=your-project VERTEX_TOKEN=$(gcloud auth print-access-token) python3 server.py
 ```
 
-Without either, the app reads only the demo `.txt` format in `demo/`.
+Without either, the app reads only the sample `.txt` format in `demo/`.
+
+## Test
+
+```bash
+for t in test_*.py; do python3 $t || break; done
+```
+
+- `test_app.py`: the router, the required-documents check and the report
+- `test_calc.py`, `test_match.py`, `test_capture.py`: calculation, heat matching, monthly log and plan
+- `test_verifier.py`: every figure in the report has a source
+- `test_extract.py`: Gemini and Vertex requests, offline
+- `test_pages.py`: the website uses exact copies of the engine
+- `test_simulation.py`: the simulation matches the engine
+
+After changing `calc.py`, `extract.py`, `server.py` or `demo/`, run `python3 make_pages.py` to update the website copies. After changing `simulate.py`, run `python3 simulate.py --write`.
 
 ## Deploy to Cloud Run
 
@@ -50,31 +55,29 @@ The URL is public and has no login. Anyone with it can upload or reset. Share it
 
 ## Demo flow (about 3 minutes)
 
-1. Click **Load demo files**. That loads 6 mill test certificates, 1 steel invoice, 3 fuel invoices and 1 production record. One certificate gives only coils, not tonnes. The app takes the tonnes from the trader's invoice for the same heat. Both sources show on that heat.
-2. Your plant shows 4.40 tCO2/t. Own furnaces add only 0.20. Most of it is Rayalaseema steel on the default value with a penalty.
-3. In **Supplier network**, click **Add verified data** for Rayalaseema and enter 1.9.
-4. Your plant drops to 2.25. Three other plants that buy from the same mill drop too (by 35% to 61%).
-5. Click **Load demo log**. LPG now uses stock-based use (52 t), not purchases (56 t). The number moves to 4.39 (2.24 if step 3 is done). The plan draft lists the gaps left: no diesel log, no production log, 2 of 12 months.
-6. Change the year to see the penalty mark-up change. Click **Open the verifier pack**. It lists every figure with its source documents, the open checks and gaps, and the method. Print it or save it as a PDF. The CSV has the same rows.
+1. Open the app. **Documents** shows four required items, all missing. **Create carbon compliance report** is locked.
+2. Click **Load sample documents**: 6 mill test certificates, 1 steel invoice, 3 fuel invoices and 1 production record. One certificate gives only coils, so its tonnes come from the trader's invoice for the same heat. All four items turn green and the report unlocks.
+3. **Dashboard**: the plant shows 4.40 tCO2/t. Own furnaces add only 0.20. Most of it is Rayalaseema steel on the default value with a penalty.
+4. **Mills**: add verified data for Rayalaseema, 1.9. The plant drops to 2.25, and three other plants that buy from the same mill drop too.
+5. **Monthly log**: click **Load sample log**. LPG now counts fuel used (52 t), not fuel bought (56 t).
+6. **Create carbon compliance report**: summary, method, every figure with its source document and line, open gaps, and signature lines. Print it or save it as a PDF, or download the EU supplier template as a CSV.
 
 ## Files
 
 - `calc.py`: the rule-based engine. AI never touches the final figure.
-- `extract.py`: Gemini extraction, plus a rule parser for the demo files.
-- `server.py`: stdlib web server and seed network (3 mills, 4 plants).
-- `index.html`: the single page.
-- `verifier.html`: the printable verifier pack. It reads `/api/audit`.
+- `extract.py`: Gemini extraction, plus a rule parser for the sample files.
+- `server.py`: the one router (`dispatch`) used by the HTTP server and by the browser build, plus the seed network (3 mills, 4 plants).
+- `docs/`: the website. `index.html` homepage, `app.html` and `app.js` the app, `docs.html` documentation, `simulation.html`, shared `app.css`. `docs/py/` holds copies of the engine made by `make_pages.py`.
+- `simulate.py`: the network-effect simulation behind `docs/simulation.html`.
+- `deck/`: the pitch deck source (in the repository only).
 
 ## Not real yet
 
 - The steel default (4.3 tCO2/t, India wire rod and bars, before the mark-up) comes from a secondary source citing Regulation (EU) 2025/2621. That annex may have been replaced by 2026/1740. Check the current Official Journal table. CN 7318 itself was not listed, so no fastener default is used. The demo mill values (2.1 and 1.9) are made up.
-- Data is kept in memory. A restart clears it.
-- No login and no edit step for extracted values.
+- Data is kept in memory. A restart clears it. On the website it lives in the browser tab.
+- No login, and no edit step for extracted values.
+- The homepage sign-up form needs a team inbox: set `CONTACT_EMAIL` in `docs/index.html`.
 - Output is one CN code. Direct emissions are not split across products.
-
-## Pitch deck
-
-`deck/` holds the slide source: `deck.json` is the index and `slides/` has one HTML file per slide, in the format of the Claude Slides artifact type. All plants, mills and numbers in the deck and the demo are made up, except where a slide cites a source.
 
 ## Demo data
 

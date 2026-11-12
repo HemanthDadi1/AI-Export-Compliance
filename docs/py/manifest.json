@@ -1,0 +1,20 @@
+{
+ "py": [
+  "calc.py",
+  "extract.py",
+  "server.py"
+ ],
+ "demo": [
+  "fuel_1.txt",
+  "fuel_2.txt",
+  "fuel_3.txt",
+  "mtc_1.txt",
+  "mtc_2.txt",
+  "mtc_3.txt",
+  "mtc_4.txt",
+  "mtc_5.txt",
+  "mtc_6.txt",
+  "production.txt",
+  "steel_invoice_1.txt"
+ ]
+}

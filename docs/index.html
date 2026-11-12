@@ -3,143 +3,157 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Export Compliance: demo</title>
+<title>Export Compliance: carbon compliance for India's metal exporters</title>
+<meta name="description" content="Turn your plant clerk into a carbon compliance expert. Upload your documents and get an EU CBAM report a verifier can check.">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
-<div class="shell">
-  <aside class="side">
-    <div class="brand"><div class="mark">EC</div><div><b>Export Compliance</b><span>AI compliance expert · demo</span></div></div>
-    <nav aria-label="Sections">
-      <a class="active" href="#overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Overview</a>
-      <a href="#plants"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V10l6 4V10l6 4V6l6 4v11z"/></svg>Plants</a>
-      <a href="#verifier"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Verifier pack</a>
-      <a href="#cost"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16"/><path d="M7 15l4-4 3 3 5-6"/></svg>Cost curve</a>
-      <a href="simulation.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg>Simulation</a>
-      <a href="https://github.com/HemanthDadi1/AI-Export-Compliance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3"/></svg>Code</a>
+<header class="site-head">
+  <div class="site">
+    <a class="brand" href="index.html"><div class="mark">EC</div><div><b>Export Compliance</b></div></a>
+    <nav aria-label="Main">
+      <a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="docs.html">Docs</a><a href="#faq">FAQ</a><a href="#contact">Contact sales</a>
     </nav>
-    <div class="foot">Made-up data · MIT licensed</div>
-  </aside>
+    <div class="actions"><a class="btn" href="#contact">Get early access</a><a class="btn primary" href="app.html">Try the app</a></div>
+  </div>
+</header>
 
-  <main class="main">
-    <div class="top" id="overview">
-      <div><h1>Overview</h1><p>Sri Venkateswara Fasteners · bolts, CN 7318 · EU carbon border (CBAM)</p></div>
-      <div class="controls">
-        <button class="switch" id="mill" role="switch" aria-checked="false"><span id="millLabel"></span><span class="track" aria-hidden="true"></span></button>
-        <select id="year" aria-label="Reporting year"></select>
+<main>
+  <section class="site hero">
+    <div>
+      <span class="eyebrow">For India's metal exporters selling to the EU</span>
+      <h1>Turn your plant clerk into a carbon compliance expert.</h1>
+      <p class="lead">Upload the documents your plant already has. AI reads them, fixed rules calculate your embedded emissions, and you get an EU carbon border (CBAM) report that a verifier can check.</p>
+      <div class="cta"><a class="btn primary lg" href="app.html">Try the app, free</a><a class="btn lg" href="#contact">Talk to sales</a></div>
+      <p class="muted">No sign-up. Sample documents included. Runs in your browser.</p>
+    </div>
+    <div class="mock" aria-label="Example of the app">
+      <div class="row2">
+        <div class="card kpi"><div class="label">Embedded emissions</div><div class="value">2.24<span class="unit">tCO2/t</span></div><div class="foot"><span class="pill ok">↓ 49%</span> after the mill shared data</div></div>
+        <div class="card kpi"><div class="label">Steel on verified data</div><div class="value">100%</div><div class="foot"><span class="pill info">6 of 6</span> heats</div></div>
+      </div>
+      <div class="card">
+        <div class="check" style="margin-bottom:8px"><span class="tick on">✓</span><div><b>Mill test certificates</b></div></div>
+        <div class="check" style="margin-bottom:8px"><span class="tick on">✓</span><div><b>Steel tonnes for every heat</b></div></div>
+        <div class="check" style="margin-bottom:8px"><span class="tick on">✓</span><div><b>Fuel records</b></div></div>
+        <div class="check" style="margin-bottom:14px"><span class="tick on">✓</span><div><b>Production record</b></div></div>
+        <a class="btn primary" style="width:100%" href="app.html#/documents">Create carbon compliance report</a>
+      </div>
+      <p class="muted" style="margin:0">Sample plant. Made-up data.</p>
+    </div>
+  </section>
+
+  <section class="site facts" aria-label="Why now">
+    <div class="card"><b>30 Sep 2027</b><p>First annual EU carbon border declaration for imported steel goods.</p></div>
+    <div class="card"><b>+30%</b><p>Penalty added to EU default values from 2028, when suppliers have no verified data.</p></div>
+    <div class="card"><b>€5.30 bn</b><p>India's exports to the EU of goods covered by the carbon border tax in 2025.<sup><a href="#sources">1</a></sup></p></div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="site">
+      <h2>How it works</h2>
+      <p class="lead">Expert work, done in three steps by the person who already handles your paperwork.</p>
+      <div class="grid3">
+        <div class="card"><div class="step-n">1</div><h3>Upload documents</h3><p>Mill test certificates, steel and fuel invoices, production records. PDF, photo or text. The checklist shows what is still missing.</p></div>
+        <div class="card"><div class="step-n">2</div><h3>See your numbers</h3><p>Emissions per tonne, what drives them, and what your EU buyer will pay each year to 2034. Every figure links to its source.</p></div>
+        <div class="card"><div class="step-n">3</div><h3>Create the report</h3><p>When the required documents are in, one click makes a report and an EU supplier template for your verifier.</p></div>
       </div>
     </div>
-    <div class="notice"><b>Demo with made-up data.</b> Plants, mills and mill values are invented. The steel default (4.3 tCO2/t before the mark-up) is from a secondary source and not confirmed. Numbers come from the real engine in the <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">repository</a>, where the full app runs locally.</div>
+  </section>
 
-    <div class="kpis" id="kpis"></div>
-
-    <div class="grid2">
-      <section class="card" id="cost" aria-labelledby="cost-h">
-        <div class="card-head"><div><h2 id="cost-h">EU importer's CBAM cost for 1,000 t</h2><p class="sub">2026–2034, €75 per tCO2, payable share rising to 100%</p></div>
-          <div class="legend"><span><i style="background:var(--bad)"></i>Steel on default values</span><span><i style="background:var(--acc)"></i>Your data</span></div></div>
-        <div id="costChart"></div>
-      </section>
-      <section class="card" aria-labelledby="mix-h"><div id="mix"></div></section>
+  <section class="section">
+    <div class="site">
+      <h2>What it does for you</h2>
+      <p class="lead">The judgement of a consultant, built into the software. The number comes from rules, never from AI.</p>
+      <div class="grid3">
+        <div class="card"><h3>Reads your documents</h3><p>Gemini reads certificates and invoices in any layout, including Indian number formats like 1,00,000 kg.</p></div>
+        <div class="card"><h3>Matches every steel heat</h3><p>Certificates give the mill, invoices give the tonnes. We join them by heat number and flag anything that disagrees.</p></div>
+        <div class="card"><h3>Logs fuel actually used</h3><p>A two-minute monthly log turns fuel bought into fuel used, which is what a verifier asks for.</p></div>
+        <div class="card"><h3>Verify a mill once</h3><p>When your steel mill shares verified data, every plant that buys from it moves off the penalty default.</p></div>
+        <div class="card"><h3>Ready for the verifier</h3><p>A draft monitoring plan, the open gaps, and every figure with the document line it came from.</p></div>
+        <div class="card"><h3>Built for Indian plants</h3><p>Priced for ₹50–500 crore exporters, designed to keep plant data in India.</p></div>
+      </div>
     </div>
+  </section>
 
-    <div class="grid2">
-      <section class="card" id="plants" aria-labelledby="plants-h">
-        <div class="card-head"><div><h2 id="plants-h">Plants buying from the same mills</h2><p class="sub">When a mill shares verified data, every plant that buys from it changes at once.</p></div></div>
-        <div class="table-wrap" id="plantTable"></div>
-      </section>
-      <section class="card" aria-labelledby="checks-h">
-        <div class="card-head"><div><h2 id="checks-h">Open checks</h2><p class="sub">What a verifier would still ask about</p></div></div>
-        <div id="checks"></div>
-      </section>
+  <section class="section">
+    <div class="site">
+      <h2>Who it is for</h2>
+      <div class="grid3" style="margin-top:20px">
+        <div class="card"><h3>Exporters</h3><p>Makers of bolts, nuts, wire, pipes and tubes who sell to the EU and get data requests from their buyers.</p></div>
+        <div class="card"><h3>Steel mills</h3><p>Share verified data once, and every customer that buys your steel can use it. Free to join.</p></div>
+        <div class="card"><h3>EU importers</h3><p>Get supplier data you can file, with a full audit trail, instead of paying on defaults.</p></div>
+      </div>
     </div>
+  </section>
 
-    <section class="card" id="verifier" aria-labelledby="ver-h">
-      <div class="card-head"><div><h2 id="ver-h">Verifier pack</h2><p class="sub">Every figure in the number and the document line it came from</p></div>
-        <div class="seg" id="filter" role="group" aria-label="Filter rows"></div></div>
-      <div class="table-wrap" id="rows"></div>
-      <p class="muted" id="draft"></p>
-    </section>
-  </main>
-</div>
-<script src="demo.js"></script>
+  <section class="section" id="pricing">
+    <div class="site">
+      <h2>Pricing</h2>
+      <p class="lead">Indicative prices during the pilot. Steel mills join free.</p>
+      <div class="grid3">
+        <div class="card price"><h3>Exposure check</h3><p>See your EU cost and what is missing.</p><b class="amount">₹25,000–50,000</b><span class="muted">one time</span>
+          <ul><li>Your numbers on defaults and on your own data</li><li>Gap list for the verifier</li></ul></div>
+        <div class="card price" style="border-color:var(--acc)"><h3>Verified data programme</h3><p>Everything to get your plant verified.</p><b class="amount">₹3–6 lakh</b><span class="muted">per plant</span>
+          <ul><li>Document reading and heat matching</li><li>Monthly log and monitoring plan draft</li><li>Carbon compliance report and EU template</li></ul></div>
+        <div class="card price"><h3>Annual care</h3><p>Stay ready each reporting year.</p><b class="amount">₹1.5–3 lakh</b><span class="muted">per year</span>
+          <ul><li>Yearly report and template</li><li>Updates when EU rules change</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="site" style="max-width:800px">
+      <h2>Questions</h2>
+      <details><summary>Is the report approved by the EU?</summary><p>No. It is a draft that an accredited verifier checks and signs. We prepare the data, sources and gaps so the verifier spends less time on it.</p></details>
+      <details><summary>Does AI decide our emissions number?</summary><p>No. AI only reads the documents. A fixed, versioned set of rules does every calculation, and each figure links back to its source.</p></details>
+      <details><summary>Which documents do I need?</summary><p>Mill test certificates for each steel heat, the tonnes for each heat (from certificates or invoices), fuel records and a production record. The <a href="docs.html#documents">documentation</a> lists them.</p></details>
+      <details><summary>Where is my data kept?</summary><p>In the free demo, files stay in your browser. The hosted app is designed to run on Google Cloud in Mumbai so plant data stays in India.</p></details>
+      <details><summary>Can I try it without signing up?</summary><p>Yes. Open the app, load the sample documents and create a report. No account needed.</p></details>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="site contact">
+      <div>
+        <h2>Get early access</h2>
+        <p class="lead" style="color:var(--mute)">Tell us about your plant. We are taking a small number of pilot plants and mills in Chennai and Hyderabad first.</p>
+        <p class="muted">Prefer to look first? <a href="app.html">Try the app</a> or read the <a href="docs.html">documentation</a>.</p>
+      </div>
+      <form class="card" id="signup">
+        <label class="field">Name <input name="name" required autocomplete="name"></label>
+        <label class="field">Work email <input name="email" type="email" required autocomplete="email"></label>
+        <label class="field">Company <input name="company" required autocomplete="organization"></label>
+        <label class="field">I am interested in <select name="topic"><option>Early access for my plant</option><option>Talk to sales</option><option>Joining as a steel mill</option><option>Partnering as a verifier</option></select></label>
+        <label class="field">Message <textarea name="message" rows="3"></textarea></label>
+        <button class="btn primary" style="width:100%">Send</button>
+        <p class="muted" id="signupNote" role="status" style="margin-top:10px"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="site-foot">
+  <div class="site">
+    <div><b style="color:var(--ink)">Export Compliance</b><br>AI compliance expert for India's metal exporters.<br>MIT licensed. Demo data is made up. Not affiliated with the European Union.</div>
+    <div><a href="app.html">App</a> · <a href="docs.html">Docs</a> · <a href="simulation.html">Simulation</a> · <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">GitHub</a></div>
+    <div id="sources"><sup>1</sup> Eurostat Comext, via <a href="https://cbamguide.com/countries/india/">CBAMGuide</a>. Penalty schedule: EU CBAM default value mark-ups for steel (10% in 2026, 20% in 2027, 30% from 2028).</div>
+  </div>
+</footer>
 <script>
-const D = window.DEMO, $ = id => document.getElementById(id);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const f = (x, d = 2) => Number(x).toLocaleString("en-GB", {maximumFractionDigits:d, minimumFractionDigits:d});
-const pct = x => f(x * 100, 0) + "%";
-const eur = x => "€" + Math.round(x).toLocaleString("en-GB");
-let after = false, filter = "all";
-
-for (let y = 2026; y <= 2034; y++) $("year").add(new Option(`Reporting year ${y}`, y, false, y === 2027));
-$("year").onchange = render;
-$("mill").onclick = () => { after = !after; render(); };
-
-function kpi(label, value, unit, foot) {
-  return `<div class="card kpi"><div class="label">${label}</div><div class="value">${value}<span class="unit">${unit}</span></div><div class="foot">${foot}</div></div>`;
-}
-
-function niceMax(v) {
-  const step = 10 ** Math.floor(Math.log10(v / 4));
-  return 4 * step * [1, 2, 2.5, 5, 10].find(m => step * m * 4 >= v);
-}
-
-function costChart(curve) {
-  const W = 720, H = 260, L = 56, R = 12, T = 14, B = 28, top = niceMax(Math.max(...curve.map(c => c.default)));
-  const x = i => L + (W - L - R) * i / (curve.length - 1), y = v => H - B - (H - T - B) * v / top;
-  let g = [0, .25, .5, .75, 1].map(t => `<line class="gridline" x1="${L}" x2="${W - R}" y1="${y(top * t)}" y2="${y(top * t)}"/><text x="${L - 8}" y="${y(top * t) + 4}" text-anchor="end">€${f(top * t / 1000, 0)}k</text>`).join("");
-  g += curve.map((c, i) => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${c.year}</text>`).join("");
-  const line = k => curve.map((c, i) => `${x(i)},${y(c[k])}`).join(" ");
-  const area = `${x(0)},${y(0)} ${line("yours")} ${x(curve.length - 1)},${y(0)}`;
-  const dots = curve.map((c, i) => `<circle class="f-acc" cx="${x(i)}" cy="${y(c.yours)}" r="3.5"><title>${c.year}: ${eur(c.yours)} with your data, ${eur(c.default)} on defaults</title></circle>`).join("");
-  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="CBAM cost by year, on default values and with your data">${g}
-    <polygon class="f-area" points="${area}"/><polyline class="s-bad" points="${line("default")}"/><polyline class="s-acc" points="${line("yours")}"/>${dots}</svg>`;
-}
-
-function render() {
-  const y = $("year").value, st = D.states[after ? "after" : "before"], Y = st.years[y], base = D.states.before.years[y];
-  const a = Y.audit, s = a.summary, steel = a.rows.filter(r => r.kind === "steel");
-  const sum = rows => rows.reduce((t, r) => t + r.tco2, 0) / s.output_t;
-  const ver = sum(steel.filter(r => !r.basis.startsWith("default"))), dft = sum(steel.filter(r => r.basis.startsWith("default")));
-  const yours = st.curve.reduce((t, c) => t + c.yours, 0), all = st.curve.reduce((t, c) => t + c.default, 0);
-  const open = [...a.checks.map(c => ["bad", c]), ...a.plan.gaps.map(g => ["warn", g])];
-  const change = s.see_total / base.plants[0].see_total - 1;
-
-  $("mill").setAttribute("aria-checked", after);
-  $("millLabel").textContent = `${D.mill} shares verified data (${D.see} tCO2/t)`;
-
-  $("kpis").innerHTML =
-    kpi("Embedded emissions", f(s.see_total), "tCO2/t", after ? `<span class="pill ok">↓ ${pct(-change)}</span> since the mill joined` : `<span class="pill warn">${pct(1 - s.verified_share)}</span> of steel on defaults`) +
-    kpi("Steel on verified mill data", pct(s.verified_share), "", `<span class="pill info">${steel.filter(r => !r.basis.startsWith("default")).length} of ${steel.length}</span> heats on actual values`) +
-    kpi("Importer cost, 2026–2034", eur(yours), "", all - yours > 1 ? `<span class="pill ok">−${eur(all - yours)}</span> against defaults` : "Same as defaults") +
-    kpi("Open checks", open.length, "", open.length ? `<span class="pill warn">To close</span> before a verifier signs` : `<span class="pill ok">None</span>`);
-
-  $("costChart").innerHTML = costChart(st.curve);
-
-  const seg = (cls, v) => `<span class="${cls}" style="width:${v / s.see_total * 100}%"></span>`;
-  $("mix").innerHTML = `<h2 id="mix-h">What makes up ${f(s.see_total)} tCO2/t</h2><p class="sub">Reporting year ${esc(s.year)}, output ${f(s.output_t, 0)} t</p>
-    <div class="bar">${seg("c-direct", s.see_direct)}${seg("c-ok", ver)}${seg("c-bad", dft)}</div>
-    ${[["c-direct", "Own furnaces (fuel)", s.see_direct], ["c-ok", "Steel, verified mill value", ver], ["c-bad", "Steel, EU default plus penalty", dft]]
-      .map(([c, l, v]) => `<div class="rowline"><span><i class="${c}" style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px"></i>${l}</span><b>${f(v)} <span class="muted">${pct(v / s.see_total)}</span></b></div>`).join("")}
-    <p class="muted" style="margin-top:12px">Indirect emissions (electricity) are not counted for iron and steel goods.</p>`;
-
-  $("plantTable").innerHTML = `<table><thead><tr><th>Plant</th><th>Steel on verified data</th><th class="n">tCO2/t</th><th class="n">Change</th></tr></thead><tbody>
-    ${Y.plants.map((p, i) => { const d = p.see_total / base.plants[i].see_total - 1;
-      return `<tr><td>${i ? esc(p.name) : `<b>${esc(p.name)}</b>`}</td>
-        <td><div style="display:flex;gap:10px;align-items:center"><div class="progress" style="flex:1"><span style="width:${p.verified_share * 100}%"></span></div><span class="muted">${pct(p.verified_share)}</span></div></td>
-        <td class="n">${f(p.see_total)}</td><td class="n">${after && d < -0.005 ? `<span class="pill ok">↓ ${pct(-d)}</span>` : `<span class="muted">—</span>`}</td></tr>`; }).join("")}</tbody></table>`;
-
-  $("checks").innerHTML = open.length ? `<ul class="list">${open.map(([c, t]) => `<li><span class="dot ${c}"></span><span>${esc(t)}</span></li>`).join("")}</ul>` : `<p class="muted">None found by these rules.</p>`;
-
-  const kinds = [["all", "All"], ["steel", "Steel"], ["fuel", "Fuel"], ["output", "Output"]];
-  $("filter").innerHTML = kinds.map(([k, l]) => `<button type="button" data-k="${k}" aria-pressed="${filter === k}">${l} ${k === "all" ? a.rows.length : a.rows.filter(r => r.kind === k).length}</button>`).join("");
-  $("filter").querySelectorAll("button").forEach(b => b.onclick = () => { filter = b.dataset.k; render(); });
-  const chip = c => `<span class="chip"><b>${esc(c.role)}</b> · ${/\.txt$/.test(c.file) ? `<a href="demo/${encodeURIComponent(c.file)}" target="_blank">${esc(c.file)}</a>` : esc(c.file)} “${esc(c.quote)}”</span>`;
-  const basis = b => { if (!b) return ""; const [kind, ...rest] = b.split(" "); return `<span class="pill ${kind === "default" ? "bad" : "ok"}">${esc(kind)}</span><div class="muted">${esc(rest.join(" "))}</div>`; };
-  $("rows").innerHTML = `<table><thead><tr><th>Figure</th><th class="n">tCO2</th><th>Basis</th><th>Sources</th></tr></thead><tbody>
-    ${a.rows.filter(r => filter === "all" || r.kind === filter).map(r => `<tr><td>${esc(r.item)}</td><td class="n">${r.tco2 == null ? "" : f(r.tco2, 1)}</td><td>${basis(r.basis)}</td><td>${r.sources.map(chip).join("")}</td></tr>`).join("")}</tbody></table>`;
-  $("draft").textContent = `With the monthly log loaded. ${a.draft}`;
-}
-render();
+// Where sign-ups go. Empty until a team inbox exists; the form then says so instead of failing silently.
+const CONTACT_EMAIL = "";
+document.getElementById("signup").onsubmit = e => {
+  e.preventDefault();
+  const d = Object.fromEntries(new FormData(e.target));
+  if (!CONTACT_EMAIL) {
+    document.getElementById("signupNote").textContent = "Sign-ups open soon. Until then, try the app: no account needed.";
+    return;
+  }
+  const body = `Name: ${d.name}\nEmail: ${d.email}\nCompany: ${d.company}\nTopic: ${d.topic}\n\n${d.message}`;
+  location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(d.topic + ": " + d.company)}&body=${encodeURIComponent(body)}`;
+  document.getElementById("signupNote").textContent = "Your email app should open with the message ready to send.";
+};
 </script>
 </body>
 </html>

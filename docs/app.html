@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Export Compliance: app</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <a class="brand" href="index.html" style="text-decoration:none;color:inherit"><div class="mark">EC</div><div><b>Export Compliance</b><span>Sri Venkateswara Fasteners</span></div></a>
+    <nav aria-label="App">
+      <a href="#/documents" data-view="documents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15l3-3 3 3"/></svg>Documents<span class="badge" id="badge-docs"></span></a>
+      <a href="#/dashboard" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
+      <a href="#/log" data-view="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Monthly log</a>
+      <a href="#/mills" data-view="mills"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V10l6 4V10l6 4V6l6 4v11z"/></svg>Mills</a>
+      <a href="#/report" data-view="report"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Report</a>
+      <div class="sep" role="separator"></div>
+      <a href="docs.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/></svg>Documentation</a>
+      <a href="simulation.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg>Simulation</a>
+    </nav>
+    <div class="foot" id="modeNote"></div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div><h1 id="title">Documents</h1><p id="subtitle"></p></div>
+      <div class="controls">
+        <select id="year" aria-label="Reporting year"></select>
+        <button class="btn primary" id="create" type="button">Create carbon compliance report</button>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <section id="view-documents" data-title="Documents" data-sub="Upload what the plant already has. We read each file and match it.">
+      <div class="notice" id="browserNote" hidden>This browser demo reads text documents in the sample format. Real PDFs and phone photos need the hosted app with Gemini. Nothing you upload here leaves your browser.</div>
+      <div class="card-head"><div><h2>Required for the report</h2><p class="sub" id="readyLine"></p></div>
+        <div class="controls"><button class="btn" id="samples" type="button">Load sample documents</button><button class="btn" id="reset" type="button">Start over</button></div></div>
+      <div class="checks" id="checklist"></div>
+      <label class="drop" id="drop" style="position:relative;display:block;margin-bottom:16px">
+        <input type="file" id="files" multiple accept=".pdf,.png,.jpg,.jpeg,.txt">
+        <b>Drop files here, or click to choose</b>
+        <span class="muted">Mill test certificates, steel and fuel invoices, production records. PDF, photo or text.</span>
+      </label>
+      <section class="card"><div class="card-head"><div><h2>Uploaded files</h2><p class="sub">What we read from each file in this session</p></div>
+        <a class="btn small" id="samplePack" href="#/documents">Download sample files</a></div>
+        <div class="table-wrap" id="uploads"></div></section>
+    </section>
+
+    <!-- Dashboard -->
+    <section id="view-dashboard" data-title="Dashboard" data-sub="Embedded emissions for bolts and nuts (CN 7318) under the EU carbon border tax" hidden>
+      <div id="dashEmpty" class="card empty" hidden><b>No numbers yet</b><p>Upload the plant's documents, or load the samples, to see the analytics.</p><a class="btn primary" href="#/documents">Go to documents</a></div>
+      <div id="dash">
+        <div class="kpis" id="kpis"></div>
+        <div class="grid2">
+          <section class="card"><div class="card-head"><div><h2>EU importer's CBAM cost for 1,000 t</h2><p class="sub">2026–2034, €75 per tCO2, payable share rising to 100%</p></div>
+            <div class="legend"><span><i style="background:var(--bad)"></i>All steel on defaults</span><span><i style="background:var(--acc)"></i>Your data</span></div></div>
+            <div id="costChart"></div></section>
+          <section class="card" id="mix"></section>
+        </div>
+        <div class="grid2">
+          <section class="card"><div class="card-head"><div><h2>Plants buying from the same mills</h2><p class="sub">Each mill verified once helps every plant that buys from it</p></div></div><div class="table-wrap" id="network"></div></section>
+          <section class="card"><div class="card-head"><div><h2>Open checks</h2><p class="sub">What a verifier would still ask about</p></div></div><div id="checksList"></div></section>
+        </div>
+      </div>
+    </section>
+
+    <!-- Monthly log -->
+    <section id="view-log" data-title="Monthly log" data-sub="Invoices show what was bought, not what was burned. Log stock each month." hidden>
+      <section class="card" style="margin-bottom:16px"><div class="card-head"><div><h2>Fuel</h2><p class="sub">Fuel used = opening stock + bought − closing stock</p></div><button class="btn small" id="sampleLog" type="button">Load sample log</button></div>
+        <form id="fuelForm" class="form-row">
+          <label>Month <input type="month" name="month" required></label>
+          <label>Fuel <select name="fuel"><option value="lpg">LPG</option><option value="diesel">Diesel</option><option value="natural_gas">Natural gas</option></select></label>
+          <label>Unit <select name="unit"><option>t</option><option>kg</option><option>litre</option><option>m3</option></select></label>
+          <label>Opening stock <input type="number" inputmode="decimal" name="opening" min="0" step="any" required></label>
+          <label>Bought <input type="number" inputmode="decimal" name="purchased" min="0" step="any" required></label>
+          <label>Closing stock <input type="number" inputmode="decimal" name="closing" min="0" step="any" required></label>
+          <label>Meter or scale <input name="meter" maxlength="80" placeholder="Optional"></label>
+          <button class="btn primary">Add month</button>
+        </form>
+        <form id="prodForm" class="form-row">
+          <label>Month <input type="month" name="month" required></label>
+          <label>Output (t) <input type="number" inputmode="decimal" name="output_t" min="0" step="any" required></label>
+          <button class="btn">Add production month</button>
+        </form>
+        <p class="error" id="logErr" role="alert"></p>
+      </section>
+      <section class="card"><div class="card-head"><div><h2>Logged months</h2></div></div><div class="table-wrap" id="logTable"></div><div id="logChecks"></div></section>
+    </section>
+
+    <!-- Mills -->
+    <section id="view-mills" data-title="Mills" data-sub="When a mill shares verified data, every plant that buys its steel moves off the default." hidden>
+      <section class="card"><div class="table-wrap" id="mills"></div><p class="error" id="millErr" role="alert"></p></section>
+    </section>
+
+    <!-- Report -->
+    <section id="view-report" data-title="Carbon compliance report" data-sub="A draft for your EU buyer and your verifier" hidden>
+      <div id="reportOut"></div>
+    </section>
+  </main>
+</div>
+<div class="overlay" id="loading" hidden><div class="card"><div class="spin"></div><b>Starting the engine in your browser</b><p class="muted">This takes about 10 seconds the first time.</p></div></div>
+<script src="app.js"></script>
+</body>
+</html>

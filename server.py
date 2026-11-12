@@ -1,12 +1,18 @@
-"""Stdlib web server. Run: python3 server.py, then open http://localhost:8000"""
-import json, os, re, uuid, copy
-from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
-import base64
+"""Stdlib web server and the one router the app uses. Run: python3 server.py, then open http://localhost:8000
+The same router runs in the browser on GitHub Pages (Pyodide), so there is one copy of every rule."""
+import base64, copy, json, os, re, uuid
+from urllib.parse import urlparse, parse_qs, unquote
+try:
+    from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+except ImportError:  # the browser build has no sockets; only dispatch() is used there
+    ThreadingHTTPServer, BaseHTTPRequestHandler = None, object
 from calc import compute, fuel_tco2, FUELS, DEFAULT_PRECURSOR_SEE
 from extract import extract, mode
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+DOCS = os.path.join(HERE, "docs")
+CTYPES = {".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "text/javascript", ".json": "application/json",
+          ".txt": "text/plain; charset=utf-8", ".py": "text/plain; charset=utf-8", ".svg": "image/svg+xml", ".png": "image/png"}
 YOU = "A"
 
 SEED = {
@@ -227,6 +233,40 @@ def audit(year):
             "draft": "Draft. Not verified. Indirect emissions are not counted for iron and steel goods."}
 
 
+def readiness(p):
+    """Which required documents are in. The report unlocks when every required item is done."""
+    eff, missing = effective(p), unmatched(p)
+    no_mill = [u["heat"] for u in missing if u["missing"] == "mill"]
+    no_tonnes = [u["heat"] for u in missing if u["missing"] == "tonnes"]
+    items = [
+        {"key": "certificates", "label": "Mill test certificates", "required": True,
+         "done": any("mill" in e for e in p["heats"].values()) and not no_mill,
+         "hint": f"Missing for heat {', '.join(no_mill)}. Upload its mill test certificate." if no_mill
+         else "One for each steel heat. It names the mill that made the steel."},
+        {"key": "tonnes", "label": "Steel tonnes for every heat", "required": True,
+         "done": bool(p["steel"]) and not no_tonnes,
+         "hint": f"No tonnes yet for heat {', '.join(no_tonnes)}. Upload its purchase invoice." if no_tonnes
+         else "From the certificates or the steel purchase invoices."},
+        {"key": "fuel", "label": "Fuel records", "required": True, "done": bool(eff["fuel"]),
+         "hint": "Fuel invoices for furnaces and boilers, or the monthly fuel log."},
+        {"key": "output", "label": "Production record", "required": True, "done": bool(eff["output"]),
+         "hint": "A production or dispatch record, or the monthly output log."},
+        {"key": "log", "label": "Monthly fuel and output log", "required": False, "done": bool(p.get("log")),
+         "hint": "Recommended. A verifier asks for fuel used, not fuel bought."},
+    ]
+    req = [i for i in items if i["required"]]
+    return {"items": items, "ready": all(i["done"] for i in req), "done": sum(i["done"] for i in req), "total": len(req)}
+
+
+def static_path(path):
+    """A file under docs/ for this URL path, or None. Never anything outside docs/."""
+    rel = unquote(path).lstrip("/") or "index.html"
+    if ".." in rel.replace("\\", "/").split("/"):
+        return None
+    full = os.path.realpath(os.path.join(DOCS, rel))
+    return full if full.startswith(os.path.realpath(DOCS) + os.sep) and os.path.isfile(full) else None
+
+
 def view(year):
     plants = []
     for p in state["plants"].values():
@@ -241,9 +281,62 @@ def view(year):
             "mode": mode()}
 
 
+def dispatch(method, path, query, body):
+    """The one router. Returns (status, payload, content type, extra headers)."""
+    js = lambda code, data: (code, data, "application/json", [])
+    you = state["plants"][YOU]
+    try:
+        year = int(query.get("year") or 2027)
+        if method == "GET":
+            if path == "/api/state":
+                return js(200, view(year))
+            if path == "/api/audit":
+                return js(200, audit(year))
+            if path == "/api/readiness":
+                return js(200, readiness(you))
+            if path == "/api/report":
+                r = readiness(you)
+                if not r["ready"]:
+                    return js(409, {"error": "required documents are missing", "readiness": r})
+                return js(200, {**audit(year), "readiness": r})
+            if path == "/api/export":
+                return 200, export_csv(year), "text/csv; charset=utf-8", [
+                    ("Content-Disposition", "attachment; filename=cbam_supplier_communication.csv")]
+            if path == "/api/doc" and query.get("id") in docs:
+                d = docs[query["id"]]
+                safe = d["mime"] if d["mime"] == "application/pdf" or d["mime"].startswith("image/") else "text/plain; charset=utf-8"
+                return 200, d["raw"], safe, []
+        if method == "POST":
+            body = body or {}
+            if path == "/api/upload":
+                if not body.get("filename") or not body.get("data"):
+                    return js(400, {"error": "filename and data are required"})
+                return js(200, add_doc(str(body["filename"])[:200], body.get("mime") or "text/plain", base64.b64decode(body["data"])))
+            if path == "/api/demo":
+                return js(200, [add_doc(f, "text/plain", open(os.path.join(HERE, "demo", f), "rb").read())
+                                for f in sorted(os.listdir(os.path.join(HERE, "demo")))])
+            if path in ("/api/log", "/api/demo_log"):
+                for e in (DEMO_LOG if path == "/api/demo_log" else [body]):
+                    add_log(you, e)
+                return js(200, {"ok": True})
+            if path == "/api/supplier":
+                see = float(body.get("see"))
+                if not body.get("name") or not 0 < see < 10:
+                    return js(400, {"error": "a mill name and a value between 0 and 10 tCO2/t are required"})
+                state["suppliers"][str(body["name"])] = {"verified": True, "see": see,
+                                                         "report": str(body.get("report") or "Verification report (demo)")[:120]}
+                return js(200, {"ok": True})
+            if path == "/api/reset":
+                state.clear(); state.update(copy.deepcopy(SEED)); docs.clear()
+                return js(200, {"ok": True})
+    except (TypeError, ValueError) as e:  # bad number, month, unit or base64 from the client
+        return js(400, {"error": str(e)})
+    return js(404, {"error": "not found"})
+
+
 class H(BaseHTTPRequestHandler):
     def send(self, code, body, ctype="application/json", extra=()):
-        data = body if isinstance(body, bytes) else json.dumps(body).encode()
+        data = body if isinstance(body, bytes) else body.encode() if isinstance(body, str) else json.dumps(body).encode()
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("X-Content-Type-Options", "nosniff")
@@ -252,54 +345,29 @@ class H(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def route(self, method, body):
+        u = urlparse(self.path)
+        q = {k: v[0] for k, v in parse_qs(u.query).items()}
+        self.send(*dispatch(method, u.path, q, body))
+
     def do_GET(self):
-        u = urlparse(self.path); q = parse_qs(u.query)
-        if u.path == "/":
-            return self.send(200, open(os.path.join(HERE, "index.html"), "rb").read(), "text/html; charset=utf-8")
-        if u.path == "/verifier":
-            return self.send(200, open(os.path.join(HERE, "verifier.html"), "rb").read(), "text/html; charset=utf-8")
-        if u.path == "/api/audit":
-            return self.send(200, audit(int(q.get("year", ["2027"])[0])))
-        if u.path == "/api/state":
-            return self.send(200, view(int(q.get("year", ["2027"])[0])))
-        if u.path == "/api/doc" and q.get("id", [""])[0] in docs:
-            d = docs[q["id"][0]]
-            safe = d["mime"] if d["mime"] == "application/pdf" or d["mime"].startswith("image/") else "text/plain; charset=utf-8"
-            return self.send(200, d["raw"], safe)
-        if u.path == "/api/export":
-            return self.send(200, export_csv(int(q.get("year", ["2027"])[0])).encode(), "text/csv",
-                             [("Content-Disposition", "attachment; filename=cbam_supplier_communication.csv")])
-        self.send(404, {"error": "not found"})
+        u = urlparse(self.path)
+        if u.path.startswith("/api/"):
+            return self.route("GET", None)
+        f = static_path(u.path)
+        if not f:
+            return self.send(404, {"error": "not found"})
+        self.send(200, open(f, "rb").read(), CTYPES.get(os.path.splitext(f)[1], "application/octet-stream"))
 
     def do_POST(self):
         n = int(self.headers.get("Content-Length") or 0)
         if n > 15_000_000:
             return self.send(413, {"error": "file too large"})
-        body = json.loads(self.rfile.read(n) or b"{}")
-        path = urlparse(self.path).path
-        if path == "/api/upload":
-            return self.send(200, add_doc(body["filename"], body.get("mime") or "text/plain", base64.b64decode(body["data"])))
-        if path == "/api/demo":
-            out = [add_doc(f, "text/plain", open(os.path.join(HERE, "demo", f), "rb").read())
-                   for f in sorted(os.listdir(os.path.join(HERE, "demo")))]
-            return self.send(200, out)
-        if path in ("/api/log", "/api/demo_log"):
-            try:
-                for e in (DEMO_LOG if path == "/api/demo_log" else [body]):
-                    add_log(state["plants"][YOU], e)
-            except ValueError as e:
-                return self.send(400, {"error": str(e)})
-            return self.send(200, {"ok": True})
-        if path == "/api/supplier":
-            see = float(body["see"])
-            if not 0 < see < 10:
-                return self.send(400, {"error": "value must be between 0 and 10 tCO2/t"})
-            state["suppliers"][body["name"]] = {"verified": True, "see": see, "report": body.get("report") or "Verification report (demo)"}
-            return self.send(200, {"ok": True})
-        if path == "/api/reset":
-            state.clear(); state.update(copy.deepcopy(SEED)); docs.clear()
-            return self.send(200, {"ok": True})
-        self.send(404, {"error": "not found"})
+        try:
+            body = json.loads(self.rfile.read(n) or b"{}")
+        except ValueError:
+            return self.send(400, {"error": "body must be JSON"})
+        self.route("POST", body)
 
     def log_message(self, *a):
         pass

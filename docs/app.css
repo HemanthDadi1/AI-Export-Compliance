@@ -261,3 +261,18 @@ section[id], .band { scroll-margin-top:72px; }
   .shell { display:block; } .main { padding:0; max-width:none; } body { background:#fff; color:#000; }
   .card { border:0; box-shadow:none; padding:0; } tr { break-inside:avoid; }
 }
+
+/* Rule finder and proof chain (homepage) */
+.finder { background:#fff; color:#1E2A38; border-radius:16px; padding:18px; box-shadow:0 20px 50px rgba(0,0,0,.35); display:flex; flex-direction:column; gap:10px; min-width:0; }
+.finder fieldset { border:0; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:6px 16px; }
+.finder legend { font-weight:600; font-size:13px; padding:0; margin-bottom:6px; }
+.finder label { font-size:14px; display:flex; gap:6px; align-items:center; }
+.finder-out { border-top:1px solid #E4EAF0; padding-top:10px; display:flex; flex-direction:column; gap:10px; min-height:60px; }
+.finder-out .muted { color:#58697A; margin:0; }
+.rule { display:flex; gap:12px; justify-content:space-between; align-items:flex-start; border:1px solid #E4EAF0; border-radius:10px; padding:10px 12px; }
+.rule small { display:block; color:#58697A; font-size:12px; } .rule p { margin:4px 0 0; font-size:13px; color:#58697A; }
+.rule .btn { flex:none; } .finder > .btn { align-self:flex-start; }
+.chain { display:grid; grid-template-columns:repeat(5, minmax(0, 1fr)); gap:12px; }
+.chain .card { position:relative; } .chain .card p { font-size:13px; }
+.chain .card:not(:last-child)::after { content:"→"; position:absolute; right:-12px; top:50%; transform:translate(50%, -50%); color:var(--mute); z-index:1; }
+@media (max-width:900px) { .chain { grid-template-columns:minmax(0, 1fr); } .chain .card:not(:last-child)::after { content:"↓"; right:auto; left:50%; top:auto; bottom:-14px; transform:translate(-50%, 0); } .rule { flex-direction:column; } }

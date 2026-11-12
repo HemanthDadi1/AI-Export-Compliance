@@ -15,15 +15,16 @@ async function boot() {
     const r = await fetch("api/readiness");
     if (r.ok && (r.headers.get("content-type") || "").includes("json")) S.mode = "server";
   } catch (e) { /* no server: fall through to the browser engine */ }
-  S.manifest = await (await fetch("py/manifest.json")).json();
+  const fresh = url => fetch(url, {cache: "no-cache"});  // never run a stale engine after an update
+  S.manifest = await (await fresh("py/manifest.json")).json();
   if (S.mode === "server") return;
   S.mode = "browser";
   $("loading").hidden = false;
   await new Promise((ok, fail) => { const s = document.createElement("script"); s.src = PYODIDE; s.onload = ok; s.onerror = fail; document.head.appendChild(s); });
   const py = await loadPyodide();
   py.FS.mkdirTree("/app/demo");
-  for (const name of S.manifest.py) py.FS.writeFile(`/app/${name}`, await (await fetch(`py/${name}`)).text());
-  for (const name of S.manifest.demo) py.FS.writeFile(`/app/demo/${name}`, await (await fetch(`demo/${name}`)).text());
+  for (const name of S.manifest.py) py.FS.writeFile(`/app/${name}`, await (await fresh(`py/${name}`)).text());
+  for (const name of S.manifest.demo) py.FS.writeFile(`/app/demo/${name}`, await (await fresh(`demo/${name}`)).text());
   py.runPython(`
 import sys, json, base64
 sys.path.insert(0, "/app")

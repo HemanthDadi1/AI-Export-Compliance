@@ -38,6 +38,9 @@ state, docs = copy.deepcopy(SEED), {}  # shortcut: in memory only, lost on resta
 
 
 def add_doc(filename, mime, raw):
+    same = next((d["name"] for d in docs.values() if d["raw"] == raw), None)
+    if same:  # a second copy would count its fuel or output twice
+        return {"file": filename, "error": f"already uploaded as {same}"}
     doc_id = uuid.uuid4().hex[:8]
     docs[doc_id] = {"name": filename, "mime": mime, "raw": raw}
     try:

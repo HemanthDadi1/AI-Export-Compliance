@@ -10,7 +10,7 @@ LPG = lambda month, o, b, c, **kw: {"kind": "fuel", "month": month, "fuel": "lpg
 
 
 def reset():
-    server.state.clear(); server.state.update(server.copy.deepcopy(server.SEED))
+    server.state.clear(); server.state.update(server.copy.deepcopy(server.SEED)); server.docs.clear()
     p = server.state["plants"][server.YOU]
     server.add_doc("lpg.txt", "text/plain", doc("Document: fuel_invoice", "Fuel: LPG", "Quantity: 30 t"))
     server.add_doc("diesel.txt", "text/plain", doc("Document: fuel_invoice", "Fuel: Diesel", "Quantity: 1000 litre"))

@@ -45,6 +45,20 @@ def test_heat_without_tonnes_blocks_the_report():
     assert call("GET", "/api/report", {"year": "2027"})[0] == 409
 
 
+def test_same_document_twice_is_counted_once():
+    reset()
+    call("POST", "/api/demo")
+    once = call("GET", "/api/state", {"year": "2027"})[1]["plants"][0]
+    again = call("POST", "/api/demo")[1]
+    assert all("already uploaded" in r["error"] for r in again)
+    twice = call("GET", "/api/state", {"year": "2027"})[1]["plants"][0]
+    assert twice["output_t"] == once["output_t"] == 1000 and twice["see_total"] == once["see_total"]
+    fuel = "Document: fuel_invoice\nFuel: LPG\nQuantity: 5 t"
+    first = call("POST", "/api/upload", body={"filename": "a.txt", "mime": "text/plain", "data": b64(fuel)})[1]
+    second = call("POST", "/api/upload", body={"filename": "copy of a.txt", "mime": "text/plain", "data": b64(fuel)})[1]
+    assert "error" not in first and "a.txt" in second["error"]
+
+
 def test_bad_inputs_are_refused():
     reset()
     assert call("POST", "/api/log", body={"kind": "fuel", "month": "2026-13"})[0] == 400

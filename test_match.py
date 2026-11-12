@@ -9,7 +9,7 @@ INV = lambda t: doc("Document: steel_invoice", "Supplier: Rajkot Steel Traders",
 
 
 def reset():
-    server.state.clear(); server.state.update(server.copy.deepcopy(server.SEED))
+    server.state.clear(); server.state.update(server.copy.deepcopy(server.SEED)); server.docs.clear()
     return server.state["plants"][server.YOU]
 
 

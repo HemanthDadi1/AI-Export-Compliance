@@ -20,7 +20,7 @@ def test_state_and_reset():
 def test_not_ready_until_required_documents_are_in():
     reset()
     r = call("GET", "/api/readiness")[1]
-    assert not r["ready"] and [i["key"] for i in r["items"] if i["required"]] == ["certificates", "tonnes", "fuel", "output"]
+    assert not r["ready"] and [i["key"] for i in r["items"] if i["required"]] == ["certificates", "tonnes", "fuel", "output", "review"]
     code, data, _, _ = call("GET", "/api/report", {"year": "2027"})
     assert code == 409 and not data["readiness"]["ready"]
 
@@ -28,6 +28,8 @@ def test_not_ready_until_required_documents_are_in():
 def test_ready_after_documents_and_report_has_everything():
     reset()
     assert call("POST", "/api/demo")[0] == 200
+    assert not call("GET", "/api/readiness")[1]["ready"]  # read, but not yet confirmed by the clerk
+    assert call("POST", "/api/review_all")[0] == 200
     r = call("GET", "/api/readiness")[1]
     assert r["ready"] and all(i["done"] for i in r["items"] if i["required"])
     code, rep, _, _ = call("GET", "/api/report", {"year": "2027"})

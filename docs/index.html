@@ -3,91 +3,126 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Export Compliance: carbon compliance for India's metal exporters</title>
-<meta name="description" content="Turn your plant clerk into a carbon compliance expert. Upload your documents and get an EU CBAM report a verifier can check.">
+<title>Niryaat: carbon compliance for exporters</title>
+<meta name="description" content="One platform for the carbon rules your buyers send. Start with EU CBAM: upload your plant's documents, confirm what we read, and get a report a verifier can check.">
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
 <header class="site-head">
   <div class="site">
-    <a class="brand" href="index.html"><div class="mark">EC</div><div><b>Export Compliance</b></div></a>
+    <a class="brand" href="index.html"><span class="mark">N</span><span><b>Niryaat</b></span></a>
     <nav aria-label="Main">
-      <a href="#how">How it works</a><a href="#pricing">Pricing</a><a href="docs.html">Docs</a><a href="#faq">FAQ</a><a href="#contact">Contact sales</a>
+      <details class="menu" id="productMenu">
+        <summary>Products</summary>
+        <div class="menu-panel">
+          <a href="app.html"><span class="ico">C</span><span><b>CBAM <span class="pill ok">Live</span></b><small>EU carbon border for steel goods. Opens the dashboard.</small></span></a>
+          <a href="#contact" aria-disabled="true"><span class="ico">S</span><span><b>Scope 1–3 footprint <span class="pill info">Soon</span></b><small>Answer your buyers' supplier-emissions requests.</small></span></a>
+          <a href="#contact" aria-disabled="true"><span class="ico">I</span><span><b>India CCTS <span class="pill info">Soon</span></b><small>Domestic carbon market reporting.</small></span></a>
+          <a href="#contact" aria-disabled="true"><span class="ico">U</span><span><b>California SB 253 <span class="pill info">Soon</span></b><small>US climate disclosure for suppliers.</small></span></a>
+        </div>
+      </details>
+      <a href="#platform">Platform</a><a href="#pricing">Pricing</a><a href="docs.html">Docs</a><a href="#contact">Contact sales</a>
     </nav>
-    <div class="actions"><a class="btn" href="#contact">Get early access</a><a class="btn primary" href="app.html">Try the app</a></div>
+    <div class="actions"><a class="btn ghost-dark" href="#contact">Book a call</a><a class="btn accent" href="app.html">Open the CBAM dashboard</a></div>
   </div>
 </header>
 
 <main>
-  <section class="site hero">
-    <div>
-      <span class="eyebrow">For India's metal exporters selling to the EU</span>
-      <h1>Turn your plant clerk into a carbon compliance expert.</h1>
-      <p class="lead">Upload the documents your plant already has. AI reads them, fixed rules calculate your embedded emissions, and you get an EU carbon border (CBAM) report that a verifier can check.</p>
-      <div class="cta"><a class="btn primary lg" href="app.html">Try the app, free</a><a class="btn lg" href="#contact">Talk to sales</a></div>
-      <p class="muted">No sign-up. Sample documents included. Runs in your browser.</p>
-    </div>
-    <div class="mock" aria-label="Example of the app">
-      <div class="row2">
-        <div class="card kpi"><div class="label">Embedded emissions</div><div class="value">2.24<span class="unit">tCO2/t</span></div><div class="foot"><span class="pill ok">↓ 49%</span> after the mill shared data</div></div>
-        <div class="card kpi"><div class="label">Steel on verified data</div><div class="value">100%</div><div class="foot"><span class="pill info">6 of 6</span> heats</div></div>
-      </div>
-      <div class="card">
-        <div class="check" style="margin-bottom:8px"><span class="tick on">✓</span><div><b>Mill test certificates</b></div></div>
-        <div class="check" style="margin-bottom:8px"><span class="tick on">✓</span><div><b>Steel tonnes for every heat</b></div></div>
-        <div class="check" style="margin-bottom:8px"><span class="tick on">✓</span><div><b>Fuel records</b></div></div>
-        <div class="check" style="margin-bottom:14px"><span class="tick on">✓</span><div><b>Production record</b></div></div>
-        <a class="btn primary" style="width:100%" href="app.html#/documents">Create carbon compliance report</a>
-      </div>
-      <p class="muted" style="margin:0">Sample plant. Made-up data.</p>
-    </div>
-  </section>
-
-  <section class="site facts" aria-label="Why now">
-    <div class="card"><b>30 Sep 2027</b><p>First annual EU carbon border declaration for imported steel goods.</p></div>
-    <div class="card"><b>+30%</b><p>Penalty added to EU default values from 2028, when suppliers have no verified data.</p></div>
-    <div class="card"><b>€5.30 bn</b><p>India's exports to the EU of goods covered by the carbon border tax in 2025.<sup><a href="#sources">1</a></sup></p></div>
-  </section>
-
-  <section class="section" id="how">
+  <section class="hero">
     <div class="site">
-      <h2>How it works</h2>
-      <p class="lead">Expert work, done in three steps by the person who already handles your paperwork.</p>
+      <div>
+        <span class="eyebrow">Carbon compliance for exporters</span>
+        <h1>Every carbon rule your buyers send. One platform.</h1>
+        <p class="lead">Start with EU CBAM today. Upload your plant's documents once, confirm what we read, and the same checked data feeds each rule that comes next.</p>
+        <div class="cta"><a class="btn accent lg" href="app.html">Open the CBAM dashboard</a><a class="btn ghost-dark lg" href="#pricing">See prices</a></div>
+        <div class="assure"><span>No sign-up</span><span>Prices on this page</span><span>Every figure links to its source</span></div>
+      </div>
+      <div class="scan" id="scan" aria-label="Example compliance scan">
+        <div class="scan-head"><b>Compliance scan</b><span>Sample plant · made-up data</span></div>
+        <div class="scan-row" data-step><span class="tick">✓</span>Mill test certificates<small>6 files</small></div>
+        <div class="scan-row" data-step><span class="tick">✓</span>Steel tonnes for every heat<small>6 of 6 heats</small></div>
+        <div class="scan-row" data-step><span class="tick">✓</span>Fuel records<small>3 invoices</small></div>
+        <div class="scan-row" data-step><span class="tick">✓</span>Production record<small>1,000 t</small></div>
+        <div class="scan-row" data-step><span class="tick">✓</span>Values confirmed by the clerk<small>11 of 11</small></div>
+        <div class="scan-alert" id="scanAlert"><b>Attention:</b> Rayalaseema Steel Rolling supplies 63% of the steel and has no verified data. That steel is on the EU default plus a penalty.</div>
+        <a class="btn primary" href="app.html#/dashboard">Try it with the sample plant</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="why">
+    <div class="site">
       <div class="grid3">
-        <div class="card"><div class="step-n">1</div><h3>Upload documents</h3><p>Mill test certificates, steel and fuel invoices, production records. PDF, photo or text. The checklist shows what is still missing.</p></div>
-        <div class="card"><div class="step-n">2</div><h3>See your numbers</h3><p>Emissions per tonne, what drives them, and what your EU buyer will pay each year to 2034. Every figure links to its source.</p></div>
-        <div class="card"><div class="step-n">3</div><h3>Create the report</h3><p>When the required documents are in, one click makes a report and an EU supplier template for your verifier.</p></div>
+        <div class="alert-card amber"><span class="tag">Attention required</span><b>30 Sep 2027</b><p>First annual EU carbon border declaration for imported steel goods, including bolts and nuts.</p><a href="docs.html#calculation">How the number works →</a></div>
+        <div class="alert-card amber"><span class="tag">Attention required</span><b>+30% penalty from 2028</b><p>Suppliers without verified data are priced on EU default values plus a mark-up that rises 10%, 20%, then 30%.</p><a href="docs.html#calculation">See the mark-ups →</a></div>
+        <div class="alert-card blue"><span class="tag">For your records</span><b>€5.30 bn of exports in scope</b><p>India sold this much carbon-border-covered goods to the EU in 2025.<sup><a href="#sources">1</a></sup> Your buyer may already be asking you for data.</p><a href="docs.html#documents">What you need to provide →</a></div>
       </div>
     </div>
   </section>
 
-  <section class="section">
+  <section class="band alt" id="paths">
     <div class="site">
-      <h2>What it does for you</h2>
-      <p class="lead">The judgement of a consultant, built into the software. The number comes from rules, never from AI.</p>
+      <h2>Where are you starting?</h2>
+      <p class="lead">Pick the situation closest to yours. CBAM is live now. The rest share the same document layer, so work you do today carries over.</p>
+      <div class="grid4">
+        <a class="card tile" href="app.html"><span class="pill ok" style="align-self:flex-start">Live</span><h3>I export steel goods to the EU</h3><p>Bolts, nuts, wire, pipes. Upload documents, get a CBAM report.</p><span class="go">Open the dashboard →</span></a>
+        <a class="card tile" href="app.html#/mills"><span class="pill ok" style="align-self:flex-start">Live</span><h3>I am a steel mill</h3><p>Share your verified value once. Every customer who buys your steel uses it.</p><span class="go">Open the mills view →</span></a>
+        <a class="card tile" href="#contact" aria-disabled="true"><span class="pill info" style="align-self:flex-start">Soon</span><h3>My buyer wants supplier emissions</h3><p>Scope 1–3 data for the US and EU buyers who send questionnaires.</p><span class="go">Join the waitlist →</span></a>
+        <a class="card tile" href="#contact" aria-disabled="true"><span class="pill info" style="align-self:flex-start">Soon</span><h3>I need India CCTS reporting</h3><p>Plant-level reporting under the domestic carbon market.</p><span class="go">Join the waitlist →</span></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="platform">
+    <div class="site">
+      <h2>One document layer, every rule</h2>
+      <p class="lead">Each carbon rule asks for the same facts in a different format: what steel you bought, what fuel you burned, what you made. We collect and check them once.</p>
+      <div class="foundation">
+        <div class="card"><h3>Your documents</h3><p>Mill test certificates, steel and fuel invoices, production records, a monthly log.</p></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="core"><h3>Checked data layer</h3><p>AI reads each file. You confirm every value against its source. Fixed rules do the sums. Nothing counts until you confirm it.</p></div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="mods">
+          <div class="mod">CBAM report <span class="pill ok">Live</span></div>
+          <div class="mod">Scope 1–3 for buyers <span class="pill info">Soon</span></div>
+          <div class="mod">India CCTS <span class="pill info">Soon</span></div>
+          <div class="mod">California SB 253 <span class="pill info">Soon</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="how">
+    <div class="site">
+      <h2>How CBAM works in the product</h2>
+      <p class="lead">The person who already handles your paperwork does the expert work. The software keeps them honest.</p>
       <div class="grid3">
-        <div class="card"><h3>Reads your documents</h3><p>Gemini reads certificates and invoices in any layout, including Indian number formats like 1,00,000 kg.</p></div>
-        <div class="card"><h3>Matches every steel heat</h3><p>Certificates give the mill, invoices give the tonnes. We join them by heat number and flag anything that disagrees.</p></div>
-        <div class="card"><h3>Logs fuel actually used</h3><p>A two-minute monthly log turns fuel bought into fuel used, which is what a verifier asks for.</p></div>
-        <div class="card"><h3>Verify a mill once</h3><p>When your steel mill shares verified data, every plant that buys from it moves off the penalty default.</p></div>
-        <div class="card"><h3>Ready for the verifier</h3><p>A draft monitoring plan, the open gaps, and every figure with the document line it came from.</p></div>
-        <div class="card"><h3>Built for Indian plants</h3><p>Priced for ₹50–500 crore exporters, designed to keep plant data in India.</p></div>
+        <div class="card"><div class="step-n">1</div><h3>Upload and check</h3><p>Drop in the files. Each one shows what we read, beside its source line. Fix what is wrong and confirm.</p></div>
+        <div class="card"><div class="step-n">2</div><h3>See where you stand</h3><p>Emissions per tonne, what drives them, and your EU buyer's cost to 2034. The dashboard tells you the single biggest gap to close.</p></div>
+        <div class="card"><div class="step-n">3</div><h3>Create the report</h3><p>When the required documents are in and confirmed, one click makes a report and an EU supplier template for your verifier.</p></div>
       </div>
     </div>
   </section>
 
-  <section class="section">
+  <section class="band">
     <div class="site">
-      <h2>Who it is for</h2>
-      <div class="grid3" style="margin-top:20px">
-        <div class="card"><h3>Exporters</h3><p>Makers of bolts, nuts, wire, pipes and tubes who sell to the EU and get data requests from their buyers.</p></div>
-        <div class="card"><h3>Steel mills</h3><p>Share verified data once, and every customer that buys your steel can use it. Free to join.</p></div>
-        <div class="card"><h3>EU importers</h3><p>Get supplier data you can file, with a full audit trail, instead of paying on defaults.</p></div>
+      <h2>What you get that a demo request does not show</h2>
+      <p class="lead">Most carbon compliance sites we looked at ask you to book a call before you can see anything, and show no prices. We put both on the page.</p>
+      <div class="card table-wrap">
+        <table class="compare"><thead><tr><th></th><th class="us">Niryaat</th><th>A typical consultancy or platform</th><th>A spreadsheet</th></tr></thead><tbody>
+          <tr><td>Try it before talking to anyone</td><td class="us yes">Yes, no sign-up</td><td class="no">Book a demo</td><td class="yes">Yes</td></tr>
+          <tr><td>Prices on the website</td><td class="us yes">Yes</td><td class="no">Usually not shown</td><td class="no">n/a</td></tr>
+          <tr><td>Every figure links to its source line</td><td class="us yes">Yes</td><td class="no">Varies</td><td class="no">Rarely</td></tr>
+          <tr><td>You confirm each value before it counts</td><td class="us yes">Yes</td><td class="no">Varies</td><td class="no">No</td></tr>
+          <tr><td>AI sets the number</td><td class="us yes">Never. Fixed rules do</td><td class="no">Varies</td><td class="no">n/a</td></tr>
+          <tr><td>Ready for a verifier to check</td><td class="us yes">Draft, with open gaps listed</td><td class="no">Varies</td><td class="no">Manual</td></tr>
+        </tbody></table>
       </div>
+      <p class="muted" style="margin-top:10px">Based on our reading of public competitor websites in November 2026. "Varies" means we could not tell from the site.</p>
     </div>
   </section>
 
-  <section class="section" id="pricing">
+  <section class="band alt" id="pricing">
     <div class="site">
       <h2>Pricing</h2>
       <p class="lead">Indicative prices during the pilot. Steel mills join free.</p>
@@ -102,29 +137,29 @@
     </div>
   </section>
 
-  <section class="section" id="faq">
+  <section class="band" id="faq">
     <div class="site" style="max-width:800px">
       <h2>Questions</h2>
-      <details><summary>Is the report approved by the EU?</summary><p>No. It is a draft that an accredited verifier checks and signs. We prepare the data, sources and gaps so the verifier spends less time on it.</p></details>
-      <details><summary>Does AI decide our emissions number?</summary><p>No. AI only reads the documents. A fixed, versioned set of rules does every calculation, and each figure links back to its source.</p></details>
-      <details><summary>Which documents do I need?</summary><p>Mill test certificates for each steel heat, the tonnes for each heat (from certificates or invoices), fuel records and a production record. The <a href="docs.html#documents">documentation</a> lists them.</p></details>
-      <details><summary>Where is my data kept?</summary><p>In the free demo, files stay in your browser. The hosted app is designed to run on Google Cloud in Mumbai so plant data stays in India.</p></details>
-      <details><summary>Can I try it without signing up?</summary><p>Yes. Open the app, load the sample documents and create a report. No account needed.</p></details>
+      <details class="faq"><summary>Is the report approved by the EU?</summary><p>No. It is a draft that an accredited verifier checks and signs. We prepare the data, the sources and the gaps so the verifier spends less time on it.</p></details>
+      <details class="faq"><summary>Does AI decide our emissions number?</summary><p>No. AI only reads the documents. You check and confirm every value, and fixed, versioned rules do every calculation.</p></details>
+      <details class="faq"><summary>What does "confirm" mean?</summary><p>Each uploaded file shows the values we read next to the line they came from. You correct anything wrong and confirm. Corrections are marked in the report, so a verifier can see them.</p></details>
+      <details class="faq"><summary>Which other rules are coming?</summary><p>Scope 1–3 supplier emissions for buyers, India's carbon market (CCTS), and California SB 253. They are on the roadmap, not built. Join the waitlist below to hear first.</p></details>
+      <details class="faq"><summary>Where is my data kept?</summary><p>In the free demo, files stay in your browser. The hosted app is designed to run on Google Cloud in Mumbai so plant data stays in India.</p></details>
     </div>
   </section>
 
-  <section class="section" id="contact">
+  <section class="band alt" id="contact">
     <div class="site contact">
       <div>
-        <h2>Get early access</h2>
-        <p class="lead" style="color:var(--mute)">Tell us about your plant. We are taking a small number of pilot plants and mills in Chennai and Hyderabad first.</p>
-        <p class="muted">Prefer to look first? <a href="app.html">Try the app</a> or read the <a href="docs.html">documentation</a>.</p>
+        <h2>Talk to us, or join a waitlist</h2>
+        <p class="lead" style="margin-bottom:12px">We are taking a small number of pilot plants and steel mills in Chennai and Hyderabad first.</p>
+        <p class="muted">Prefer to look first? <a href="app.html">Open the CBAM dashboard</a> or read the <a href="docs.html">documentation</a>.</p>
       </div>
       <form class="card" id="signup">
         <label class="field">Name <input name="name" required autocomplete="name"></label>
         <label class="field">Work email <input name="email" type="email" required autocomplete="email"></label>
         <label class="field">Company <input name="company" required autocomplete="organization"></label>
-        <label class="field">I am interested in <select name="topic"><option>Early access for my plant</option><option>Talk to sales</option><option>Joining as a steel mill</option><option>Partnering as a verifier</option></select></label>
+        <label class="field">I am interested in <select name="topic" id="topic"><option>CBAM for my plant</option><option>Talk to sales</option><option>Joining as a steel mill</option><option>Scope 1–3 for buyer requests (waitlist)</option><option>India CCTS (waitlist)</option><option>California SB 253 (waitlist)</option><option>Partnering as a verifier</option></select></label>
         <label class="field">Message <textarea name="message" rows="3"></textarea></label>
         <button class="btn primary" style="width:100%">Send</button>
         <p class="muted" id="signupNote" role="status" style="margin-top:10px"></p>
@@ -135,25 +170,38 @@
 
 <footer class="site-foot">
   <div class="site">
-    <div><b style="color:var(--ink)">Export Compliance</b><br>AI compliance expert for India's metal exporters.<br>MIT licensed. Demo data is made up. Not affiliated with the European Union.</div>
-    <div><a href="app.html">App</a> · <a href="docs.html">Docs</a> · <a href="simulation.html">Simulation</a> · <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">GitHub</a></div>
-    <div id="sources"><sup>1</sup> Eurostat Comext, via <a href="https://cbamguide.com/countries/india/">CBAMGuide</a>. Penalty schedule: EU CBAM default value mark-ups for steel (10% in 2026, 20% in 2027, 30% from 2028).</div>
+    <div><b>Niryaat</b><br>Carbon compliance for exporters.<br>MIT licensed. Demo data is made up. Not affiliated with the European Union.</div>
+    <div><a href="app.html">CBAM dashboard</a> · <a href="docs.html">Docs</a> · <a href="simulation.html">Simulation</a> · <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">GitHub</a></div>
+    <div id="sources" style="max-width:420px"><sup>1</sup> Eurostat Comext, via <a href="https://cbamguide.com/countries/india/">CBAMGuide</a>. Mark-ups on EU default values for steel: 10% in 2026, 20% in 2027, 30% from 2028.</div>
   </div>
 </footer>
 <script>
-// Where sign-ups go. Empty until a team inbox exists; the form then says so instead of failing silently.
+// Sign-ups go to this address through the visitor's own email app. Empty until a team inbox exists.
 const CONTACT_EMAIL = "";
 document.getElementById("signup").onsubmit = e => {
   e.preventDefault();
   const d = Object.fromEntries(new FormData(e.target));
-  if (!CONTACT_EMAIL) {
-    document.getElementById("signupNote").textContent = "Sign-ups open soon. Until then, try the app: no account needed.";
-    return;
-  }
+  if (!CONTACT_EMAIL) { document.getElementById("signupNote").textContent = "Sign-ups open soon. Until then, open the CBAM dashboard: no account needed."; return; }
   const body = `Name: ${d.name}\nEmail: ${d.email}\nCompany: ${d.company}\nTopic: ${d.topic}\n\n${d.message}`;
   location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(d.topic + ": " + d.company)}&body=${encodeURIComponent(body)}`;
   document.getElementById("signupNote").textContent = "Your email app should open with the message ready to send.";
 };
+// Waitlist links preselect their topic.
+document.querySelectorAll('a[aria-disabled="true"]').forEach(a => a.addEventListener("click", () => {
+  const t = a.textContent; const pick = [["Scope", 3], ["CCTS", 4], ["SB 253", 5]].find(([k]) => t.includes(k));
+  if (pick) document.getElementById("topic").selectedIndex = pick[1];
+}));
+// Product menu closes on outside click or Escape.
+const menu = document.getElementById("productMenu");
+document.addEventListener("click", e => { if (menu.open && !menu.contains(e.target)) menu.open = false; });
+document.addEventListener("keydown", e => { if (e.key === "Escape") menu.open = false; });
+// The sample scan ticks through its checklist, then raises the attention card. Reduced motion shows the end state.
+(function () {
+  const rows = [...document.querySelectorAll("[data-step]")], alert = document.getElementById("scanAlert");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { rows.forEach(r => r.classList.add("on")); alert.classList.add("show"); return; }
+  rows.forEach((r, i) => setTimeout(() => r.classList.add("on"), 500 + i * 450));
+  setTimeout(() => alert.classList.add("show"), 500 + rows.length * 450);
+})();
 </script>
 </body>
 </html>

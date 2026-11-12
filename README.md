@@ -1,6 +1,6 @@
-# AI compliance expert for Indian exporters: MVP
+# Niryaat: carbon compliance for exporters (CBAM first)
 
-Lets a clerk at a metal plant produce EU carbon-border (CBAM) data for fasteners (CN 7318) that a verifier can check. AI reads the documents. Rules do the calculation. The app drafts the monitoring plan, lists the gaps still open, and creates a carbon compliance report once the required documents are in. A mill verified once serves every plant that buys from it.
+A carbon compliance platform. The first product, CBAM, lets a clerk at a metal plant produce EU carbon-border data for fasteners (CN 7318) that a verifier can check. The homepage has a Products menu; CBAM opens the dashboard, and other rules (Scope 1–3, India CCTS, California SB 253) are planned on the same document layer. "Niryaat" is a working name taken from the design references. Rename it in `docs/*.html`. AI reads the documents. Rules do the calculation. The app drafts the monitoring plan, lists the gaps still open, and creates a carbon compliance report once the required documents are in. A mill verified once serves every plant that buys from it.
 
 **Website:** https://hemanthdadi1.github.io/AI-Export-Compliance/ (homepage, [app](https://hemanthdadi1.github.io/AI-Export-Compliance/app.html), [docs](https://hemanthdadi1.github.io/AI-Export-Compliance/docs.html), [simulation](https://hemanthdadi1.github.io/AI-Export-Compliance/simulation.html)). On the website the app runs the same Python engine in your browser with Pyodide, using made-up sample data.
 
@@ -33,6 +33,7 @@ for t in test_*.py; do python3 $t || break; done
 ```
 
 - `test_app.py`: the router, the required-documents check and the report
+- `test_review.py`: check and confirm, corrections, removal, and the edit trail
 - `test_calc.py`, `test_match.py`, `test_capture.py`: calculation, heat matching, monthly log and plan
 - `test_verifier.py`: every figure in the report has a source
 - `test_extract.py`: Gemini and Vertex requests, offline
@@ -56,11 +57,12 @@ The URL is public and has no login. Anyone with it can upload or reset. Share it
 ## Demo flow (about 3 minutes)
 
 1. Open the app. **Documents** shows four required items, all missing. **Create carbon compliance report** is locked.
-2. Click **Load sample documents**: 6 mill test certificates, 1 steel invoice, 3 fuel invoices and 1 production record. One certificate gives only coils, so its tonnes come from the trader's invoice for the same heat. All four items turn green and the report unlocks.
-3. **Dashboard**: the plant shows 4.40 tCO2/t. Own furnaces add only 0.20. Most of it is Rayalaseema steel on the default value with a penalty.
-4. **Mills**: add verified data for Rayalaseema, 1.9. The plant drops to 2.25, and three other plants that buy from the same mill drop too.
-5. **Monthly log**: click **Load sample log**. LPG now counts fuel used (52 t), not fuel bought (56 t).
-6. **Create carbon compliance report**: summary, method, every figure with its source document and line, open gaps, and signature lines. Print it or save it as a PDF, or download the EU supplier template as a CSV.
+2. Click **Load sample documents**: 6 mill test certificates, 1 steel invoice, 3 fuel invoices and 1 production record. One certificate gives only coils, so its tonnes come from the trader's invoice for the same heat. Four items turn green. The fifth, **Extracted values confirmed**, stays open, and the report stays locked.
+3. Under **Check what we read**, each file is a card with its values and source line. Change a value (say LPG 30 t to 29), then **Confirm**, or press **Confirm all as read**. The report unlocks. Corrections are listed in it.
+4. **Dashboard**: an Attention card names the biggest gap and copies a request email to the mill. The plant shows 4.40 tCO2/t. Own furnaces add only 0.20. Most of it is Rayalaseema steel on the default value with a penalty.
+5. **Mills**: add verified data for Rayalaseema, 1.9. The plant drops to 2.25, and three other plants that buy from the same mill drop too.
+6. **Monthly log**: click **Load sample log**. LPG now counts fuel used (52 t), not fuel bought (56 t).
+7. **Create carbon compliance report**: summary, method, every figure with its source document and line, who checked it and what they changed, open gaps, and signature lines. Print it or save it as a PDF, or download the EU supplier template as a CSV.
 
 ## Files
 

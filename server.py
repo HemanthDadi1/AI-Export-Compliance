@@ -37,34 +37,124 @@ SEED = {
 state, docs = copy.deepcopy(SEED), {}  # shortcut: in memory only, lost on restart. Move to Cloud SQL for pilots.
 
 
+DOC_TYPES = ("mtc", "steel_invoice", "fuel_invoice", "production", "other")
+FUEL_NAMES, UNIT_NAMES = ("lpg", "diesel", "natural_gas"), ("t", "kg", "litre", "m3")
+pos = lambda v: isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0
+
+
+def apply_record(p, doc_id, d):
+    """Put one document's values into the plant. Returns why it was not used, or None."""
+    rec, t = d["record"], d["record"]["doc_type"]
+    src = {"doc": doc_id, "file": d["name"], "quote": rec.get("quote"), "edited": bool(d["edits"])}
+    if t in ("mtc", "steel_invoice"):
+        rows = [h for h in rec.get("heats") or [] if isinstance(h, dict) and (h.get("heat_no") or pos(h.get("tonnes")))]
+        rows = rows or [{"heat_no": rec.get("heat_no"), "tonnes": rec.get("steel_tonnes")}]
+        mill = rec.get("supplier") if t == "mtc" else None  # an invoice seller may be a trader, never the mill
+        if not any(h.get("heat_no") or (mill and pos(h.get("tonnes"))) for h in rows):
+            return "not used: no heat number"
+        for i, h in enumerate(rows):
+            add_heat(p, h.get("heat_no") or f"{doc_id}-{i}", mill, h.get("tonnes") if pos(h.get("tonnes")) else None, src)
+    elif t == "fuel_invoice" and rec.get("fuel") in FUEL_NAMES and pos(rec.get("quantity")) and rec.get("unit") in UNIT_NAMES:
+        p["fuel"].append({"fuel": rec["fuel"], "qty": rec["quantity"], "unit": rec["unit"], "source": src})
+    elif t == "production" and pos(rec.get("output_tonnes")):
+        p["output"].append({"tonnes": rec["output_tonnes"], "cn": rec.get("cn_code"), "source": src})
+    else:
+        return "not used: missing or invalid fields"
+    return None
+
+
+def rebuild():
+    """The plant's document figures are always derived from the stored records, so a correction or a removal just replays them."""
+    p = state["plants"][YOU]
+    p.update(steel=[], fuel=[], output=[], heats={}, checks=[])
+    for doc_id, d in docs.items():
+        d["error"] = apply_record(p, doc_id, d)
+    sync_steel(p)
+
+
+def doc_result(doc_id):
+    d = docs[doc_id]
+    out = {"file": d["name"], "doc": doc_id, "mode": d["mode"], "record": d["record"]}
+    return {**out, "error": d["error"]} if d["error"] else out
+
+
 def add_doc(filename, mime, raw):
     same = next((d["name"] for d in docs.values() if d["raw"] == raw), None)
     if same:  # a second copy would count its fuel or output twice
         return {"file": filename, "error": f"already uploaded as {same}"}
-    doc_id = uuid.uuid4().hex[:8]
-    docs[doc_id] = {"name": filename, "mime": mime, "raw": raw}
     try:
-        rec, mode = extract(mime, raw)
+        rec, how = extract(mime, raw)
     except Exception as e:
         return {"file": filename, "error": f"could not read: {e}"}
-    src = {"doc": doc_id, "file": filename, "quote": rec.get("quote")}
-    p, t, pos = state["plants"][YOU], rec["doc_type"], lambda v: isinstance(v, (int, float)) and v > 0
-    if t in ("mtc", "steel_invoice"):
-        rows = [h for h in rec.get("heats") or [] if isinstance(h, dict) and (h.get("heat_no") or pos(h.get("tonnes")))]
-        rows = rows or [{"heat_no": rec["heat_no"], "tonnes": rec["steel_tonnes"]}]
-        mill = rec["supplier"] if t == "mtc" else None  # an invoice seller may be a trader, never the mill
-        if not any(h.get("heat_no") or (mill and pos(h.get("tonnes"))) for h in rows):
-            return {"file": filename, "mode": mode, "record": rec, "error": "not used: no heat number"}
-        for i, h in enumerate(rows):
-            add_heat(p, h.get("heat_no") or f"{doc_id}-{i}", mill, h.get("tonnes") if pos(h.get("tonnes")) else None, src)
-        sync_steel(p)
-    elif t == "fuel_invoice" and rec["fuel"] in (*FUELS, "natural_gas") and pos(rec["quantity"]) and rec["unit"]:
-        p["fuel"].append({"fuel": rec["fuel"], "qty": rec["quantity"], "unit": rec["unit"], "source": src})
-    elif t == "production" and pos(rec["output_tonnes"]):
-        p["output"].append({"tonnes": rec["output_tonnes"], "cn": rec["cn_code"], "source": src})
-    else:
-        return {"file": filename, "mode": mode, "record": rec, "error": "not used: missing or invalid fields"}
-    return {"file": filename, "mode": mode, "record": rec}
+    doc_id = uuid.uuid4().hex[:8]
+    docs[doc_id] = {"name": filename, "mime": mime, "raw": raw, "record": rec, "mode": how, "reviewed": False, "edits": [], "error": None}
+    rebuild()
+    return doc_result(doc_id)
+
+
+def clean_record(patch):
+    """Check a clerk's corrections. Raises ValueError on anything unsafe, so nothing is half-applied."""
+    if not isinstance(patch, dict):
+        raise ValueError("record must be an object")
+    out = {}
+
+    def text(k, n):
+        if patch[k] is not None and not isinstance(patch[k], str):
+            raise ValueError(f"{k} must be text")
+        return (patch[k] or "")[:n] or None
+
+    def num(v, k):
+        if v is not None and not pos(v):
+            raise ValueError(f"{k} must be a number above 0")
+        return v
+    for k in patch:
+        if k == "doc_type":
+            if patch[k] not in DOC_TYPES:
+                raise ValueError("unknown document type")
+            out[k] = patch[k]
+        elif k in ("supplier", "heat_no", "cn_code"):
+            out[k] = text(k, 120)
+        elif k in ("steel_tonnes", "quantity", "output_tonnes"):
+            out[k] = num(patch[k], k)
+        elif k == "fuel":
+            if patch[k] is not None and patch[k] not in FUEL_NAMES:
+                raise ValueError("unknown fuel")
+            out[k] = patch[k]
+        elif k == "unit":
+            if patch[k] is not None and patch[k] not in UNIT_NAMES:
+                raise ValueError("unknown unit")
+            out[k] = patch[k]
+        elif k == "heats":
+            if not isinstance(patch[k], list) or len(patch[k]) > 50 or not all(isinstance(h, dict) for h in patch[k]):
+                raise ValueError("heats must be a list of heats")
+            out[k] = [{"heat_no": (str(h.get("heat_no") or "")[:60] or None), "tonnes": num(h.get("tonnes"), "tonnes")} for h in patch[k]]
+        else:
+            raise ValueError(f"unknown field {k}")
+    return out
+
+
+def review(doc_id, patch):
+    d = docs[doc_id]
+    new = clean_record(patch or {})
+    for k, v in new.items():
+        if d["record"].get(k) != v:
+            d["edits"].append({"field": k, "from": d["record"].get(k), "to": v})
+            d["record"][k] = v
+    d["reviewed"] = True
+    rebuild()
+
+
+def issues(d):
+    out = [d["error"]] if d["error"] else []
+    r = d["record"]
+    if r["doc_type"] in ("mtc", "steel_invoice"):
+        rows = [h for h in r.get("heats") or [] if isinstance(h, dict)] or [{"heat_no": r.get("heat_no"), "tonnes": r.get("steel_tonnes")}]
+        heats = state["plants"][YOU]["heats"]
+        loose = [h["heat_no"] for h in rows if h.get("heat_no") and not pos(h.get("tonnes"))
+                 and "tonnes" not in heats.get(re.sub(r"[^A-Z0-9]", "", h["heat_no"].upper()), {})]
+        if loose:
+            out.append(f"No tonnes for heat {', '.join(loose)}. Type them here, or upload the invoice for it.")
+    return out
 
 
 def add_heat(p, key, mill, tonnes, src):
@@ -212,7 +302,7 @@ def audit(year):
         return {"empty": True}
 
     def src(role, s):
-        return {"role": role, "file": s["file"], "doc": s.get("doc"), "quote": s.get("quote")} if s else None
+        return {"role": role, "file": s["file"], "doc": s.get("doc"), "quote": s.get("quote"), "edited": bool(s.get("edited"))} if s else None
 
     def sources(*pairs):
         out = [x for x in (src(*pr) for pr in pairs) if x]
@@ -229,8 +319,11 @@ def audit(year):
                          "sources": sources(("tonnes", h.get("source")), ("mill", h.get("mill_source")))})
     rows += [{"kind": "output", "item": f"output {o['tonnes']} t", "tco2": None, "basis": "",
               "sources": sources(("output", o.get("source")))} for o in effective(p)["output"]]
+    edits = [{"file": d["name"], **e} for d in docs.values() for e in d["edits"]]
     keys = ("name", "year", "output_t", "see_total", "see_direct", "see_precursor", "verified_share")
-    return {"summary": {k: r[k] for k in keys}, "rows": rows, "plan": plan(p), "method": plan(p)["lines"],
+    return {"summary": {k: r[k] for k in keys}, "rows": rows,
+            "review": {"documents": len(docs), "confirmed": sum(d["reviewed"] for d in docs.values()),
+                       "edited": sum(bool(d["edits"]) for d in docs.values()), "edits": edits}, "plan": plan(p), "method": plan(p)["lines"],
             "checks": p["checks"] + log_checks(p),
             "default_note": f"Steel default used: {DEFAULT_PRECURSOR_SEE} tCO2/t before the mark-up. Secondary source. Check it against the current EU table.",
             "draft": "Draft. Not verified. Indirect emissions are not counted for iron and steel goods."}
@@ -254,6 +347,10 @@ def readiness(p):
          "hint": "Fuel invoices for furnaces and boilers, or the monthly fuel log."},
         {"key": "output", "label": "Production record", "required": True, "done": bool(eff["output"]),
          "hint": "A production or dispatch record, or the monthly output log."},
+        {"key": "review", "label": "Extracted values confirmed", "required": True,
+         "done": bool(docs) and all(d["reviewed"] for d in docs.values()),
+         "hint": f"{sum(not d['reviewed'] for d in docs.values())} of {len(docs)} documents still to confirm. Check each value against its file."
+         if docs and not all(d["reviewed"] for d in docs.values()) else "Check what we read from each file, fix anything wrong, then confirm."},
         {"key": "log", "label": "Monthly fuel and output log", "required": False, "done": bool(p.get("log")),
          "hint": "Recommended. A verifier asks for fuel used, not fuel bought."},
     ]
@@ -305,6 +402,9 @@ def dispatch(method, path, query, body):
             if path == "/api/export":
                 return 200, export_csv(year), "text/csv; charset=utf-8", [
                     ("Content-Disposition", "attachment; filename=cbam_supplier_communication.csv")]
+            if path == "/api/docs":
+                return js(200, [{"id": i, "name": d["name"], "mime": d["mime"], "mode": d["mode"], "record": d["record"],
+                                 "reviewed": d["reviewed"], "edits": d["edits"], "issues": issues(d)} for i, d in docs.items()])
             if path == "/api/doc" and query.get("id") in docs:
                 d = docs[query["id"]]
                 safe = d["mime"] if d["mime"] == "application/pdf" or d["mime"].startswith("image/") else "text/plain; charset=utf-8"
@@ -318,6 +418,19 @@ def dispatch(method, path, query, body):
             if path == "/api/demo":
                 return js(200, [add_doc(f, "text/plain", open(os.path.join(HERE, "demo", f), "rb").read())
                                 for f in sorted(os.listdir(os.path.join(HERE, "demo")))])
+            if path in ("/api/review", "/api/doc_remove"):
+                if body.get("doc") not in docs:
+                    return js(404, {"error": "no such document"})
+                if path == "/api/doc_remove":
+                    del docs[body["doc"]]
+                    rebuild()
+                else:
+                    review(body["doc"], body.get("record"))
+                return js(200, {"ok": True})
+            if path == "/api/review_all":
+                for d in docs.values():
+                    d["reviewed"] = True
+                return js(200, {"ok": True})
             if path in ("/api/log", "/api/demo_log"):
                 for e in (DEMO_LOG if path == "/api/demo_log" else [body]):
                     add_log(you, e)
@@ -392,7 +505,7 @@ def export_csv(year):
     w.writerow(["Indirect emissions", "not counted for iron and steel goods"])
     w.writerow([]); w.writerow(["Audit trail: item", "value", "basis", "source file", "source text"])
     for r in a["rows"]:
-        files = " + ".join(dict.fromkeys(x["file"] for x in r["sources"]))
+        files = " + ".join(dict.fromkeys(x["file"] + (" (edited by clerk)" if x.get("edited") else "") for x in r["sources"]))
         w.writerow([r["item"], "" if r["tco2"] is None else r["tco2"], r["basis"], files, r["sources"][0].get("quote")])
     w.writerow([]); w.writerow(["Monitoring plan (draft)"])
     for l in a["method"]:

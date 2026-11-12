@@ -3,21 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Documentation · Export Compliance</title>
+<title>Documentation · Niryaat</title>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
 <header class="site-head">
   <div class="site">
-    <a class="brand" href="index.html"><div class="mark">EC</div><div><b>Export Compliance</b></div></a>
-    <nav aria-label="Main"><a href="index.html#how">How it works</a><a href="index.html#pricing">Pricing</a><a href="docs.html">Docs</a><a href="index.html#contact">Contact sales</a></nav>
-    <div class="actions"><a class="btn primary" href="app.html">Try the app</a></div>
+    <a class="brand" href="index.html"><span class="mark">N</span><span><b>Niryaat</b></span></a>
+    <nav aria-label="Main">
+      <details class="menu" id="productMenu">
+        <summary>Products</summary>
+        <div class="menu-panel">
+          <a href="app.html"><span class="ico">C</span><span><b>CBAM <span class="pill ok">Live</span></b><small>EU carbon border for steel goods. Opens the dashboard.</small></span></a>
+          <a href="index.html#contact" aria-disabled="true"><span class="ico">S</span><span><b>Scope 1–3 footprint <span class="pill info">Soon</span></b><small>Answer your buyers' supplier-emissions requests.</small></span></a>
+          <a href="index.html#contact" aria-disabled="true"><span class="ico">I</span><span><b>India CCTS <span class="pill info">Soon</span></b><small>Domestic carbon market reporting.</small></span></a>
+          <a href="index.html#contact" aria-disabled="true"><span class="ico">U</span><span><b>California SB 253 <span class="pill info">Soon</span></b><small>US climate disclosure for suppliers.</small></span></a>
+        </div>
+      </details>
+      <a href="index.html#platform">Platform</a><a href="index.html#pricing">Pricing</a><a href="docs.html">Docs</a><a href="index.html#contact">Contact sales</a>
+    </nav>
+    <div class="actions"><a class="btn accent" href="app.html">Open the CBAM dashboard</a></div>
   </div>
 </header>
 
 <div class="site doc">
   <nav aria-label="On this page">
-    <a href="#start">Getting started</a><a href="#documents">Required documents</a><a href="#calculation">How the number is calculated</a>
+    <a href="#start">Getting started</a><a href="#documents">Required documents</a><a href="#review">Check and confirm</a><a href="#calculation">How the number is calculated</a>
     <a href="#log">Monthly log</a><a href="#mills">Mills</a><a href="#report">The report</a><a href="#self-host">Run your own copy</a>
     <a href="#privacy">Data and privacy</a><a href="#limits">Limits</a>
   </nav>
@@ -27,10 +38,11 @@
 
     <h2 id="start">Getting started</h2>
     <ol>
-      <li>Open the <a href="app.html">app</a>. No account is needed.</li>
+      <li>Open the <a href="app.html">CBAM dashboard</a>. No account is needed.</li>
       <li>On <b>Documents</b>, drop your files in, or press <b>Load sample documents</b> to try it with made-up data.</li>
-      <li>Watch the checklist. When every required item is done, <b>Create carbon compliance report</b> unlocks.</li>
-      <li>Check <b>Dashboard</b> for your numbers, add a <b>Monthly log</b>, and record verified mill values under <b>Mills</b>.</li>
+      <li>Under <b>Check what we read</b>, compare each value with its source line, fix anything wrong, and confirm.</li>
+      <li>Watch the checklist. When every required item is done and confirmed, <b>Create carbon compliance report</b> unlocks.</li>
+      <li>Check <b>Dashboard</b> for your numbers and the biggest gap, add a <b>Monthly log</b>, and record verified mill values under <b>Mills</b>.</li>
     </ol>
 
     <h2 id="documents">Required documents</h2>
@@ -42,6 +54,16 @@
       <tr><td>Monthly fuel and output log</td><td>Opening stock, bought, closing stock, output</td><td>Recommended</td></tr>
     </tbody></table>
     <p>Heat numbers match even when written differently, for example <code>BR-148</code> and <code>br 148</code>. If two documents disagree, the first value is kept and the conflict is listed for you to check.</p>
+
+    <h2 id="review">Check and confirm</h2>
+    <p>AI can misread a file. So nothing counts toward your number as final until a person confirms it.</p>
+    <ul>
+      <li>Each uploaded file becomes a card with the values we read, the line they came from, and a link to the original.</li>
+      <li>Fix any value, or change what the file is (for example from "Other" to "Fuel invoice"), then press <b>Confirm</b>. <b>Confirm all as read</b> accepts everything unchanged.</li>
+      <li>Every correction is recorded. The report lists what was changed, marks edited sources, and the CSV flags them.</li>
+      <li>A wrong file can be removed. Its figures leave your number at once.</li>
+      <li>The report stays locked until every file is confirmed.</li>
+    </ul>
 
     <h2 id="calculation">How the number is calculated</h2>
     <p>AI only reads documents. Every number below is calculated by fixed rules in <code>calc.py</code>.</p>
@@ -61,7 +83,7 @@
     <p>Most of a bolt's emissions come from the steel. When a mill shares a verified value, record it under <b>Mills</b>. Every plant that buys from that mill moves from the penalty default to the actual value. The <a href="simulation.html">network simulation</a> shows how fast that spreads.</p>
 
     <h2 id="report">The report</h2>
-    <p>The carbon compliance report has a summary, the method, every figure with the document and line it came from, the open checks and gaps, and space for the plant and the verifier to sign. Print it or save it as a PDF. <b>Download EU supplier template</b> gives the same figures as a CSV for your EU buyer.</p>
+    <p>The carbon compliance report has a summary, the method, every figure with the document and line it came from, who checked the values and what they changed, the open checks and gaps, and space for the plant and the verifier to sign. Print it or save it as a PDF. <b>Download EU supplier template</b> gives the same figures as a CSV for your EU buyer.</p>
     <p>The report is a draft. An accredited verifier must check and sign it before it is used in a CBAM declaration.</p>
 
     <h2 id="self-host">Run your own copy</h2>
@@ -87,6 +109,11 @@ VERTEX_PROJECT=your-project python3 server.py   # Gemini on Vertex AI, Mumbai</p
   </article>
 </div>
 
-<footer class="site-foot"><div class="site"><div>MIT licensed. Demo data is made up. Not affiliated with the European Union.</div><div><a href="index.html">Home</a> · <a href="app.html">App</a> · <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">GitHub</a></div></div></footer>
+<footer class="site-foot"><div class="site"><div>MIT licensed. Demo data is made up. Not affiliated with the European Union.</div><div><a href="index.html">Home</a> · <a href="app.html">CBAM dashboard</a> · <a href="https://github.com/HemanthDadi1/AI-Export-Compliance">GitHub</a></div></div></footer>
+<script>
+const menu = document.getElementById("productMenu");
+document.addEventListener("click", e => { if (menu.open && !menu.contains(e.target)) menu.open = false; });
+document.addEventListener("keydown", e => { if (e.key === "Escape") menu.open = false; });
+</script>
 </body>
 </html>

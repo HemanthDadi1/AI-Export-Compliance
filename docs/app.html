@@ -3,14 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Export Compliance: app</title>
+<title>CBAM · Niryaat</title>
 <link rel="stylesheet" href="app.css">
 </head>
 <body>
 <div class="shell">
   <aside class="side">
-    <a class="brand" href="index.html" style="text-decoration:none;color:inherit"><div class="mark">EC</div><div><b>Export Compliance</b><span>Sri Venkateswara Fasteners</span></div></a>
-    <nav aria-label="App">
+    <details class="menu" id="productMenu">
+      <summary aria-label="Switch product"><span class="brand"><span class="mark">N</span><span><b>Niryaat</b><span>CBAM · Sri Venkateswara Fasteners</span></span></span></summary>
+      <div class="menu-panel">
+        <a href="index.html"><span class="ico">⌂</span><span><b>Home</b><small>All products and pricing</small></span></a>
+        <a href="app.html" aria-current="page"><span class="ico">C</span><span><b>CBAM <span class="pill ok">Live</span></b><small>EU carbon border, steel goods</small></span></a>
+        <a href="index.html#contact" aria-disabled="true"><span class="ico">S</span><span><b>Scope 1–3 footprint <span class="pill info">Soon</span></b><small>Buyer supplier-emissions requests</small></span></a>
+        <a href="index.html#contact" aria-disabled="true"><span class="ico">I</span><span><b>India CCTS <span class="pill info">Soon</span></b><small>Domestic carbon market reporting</small></span></a>
+        <a href="index.html#contact" aria-disabled="true"><span class="ico">U</span><span><b>California SB 253 <span class="pill info">Soon</span></b><small>US climate disclosure</small></span></a>
+      </div>
+    </details>
+    <nav aria-label="CBAM">
       <a href="#/documents" data-view="documents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M12 18v-6M9 15l3-3 3 3"/></svg>Documents<span class="badge" id="badge-docs"></span></a>
       <a href="#/dashboard" data-view="dashboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
       <a href="#/log" data-view="log"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Monthly log</a>
@@ -33,29 +42,32 @@
     </div>
 
     <!-- Documents -->
-    <section id="view-documents" data-title="Documents" data-sub="Upload what the plant already has. We read each file and match it.">
+    <section id="view-documents" data-title="Documents" data-sub="Upload what the plant already has, check what we read, then confirm it.">
       <div class="notice" id="browserNote" hidden>This browser demo reads text documents in the sample format. Real PDFs and phone photos need the hosted app with Gemini. Nothing you upload here leaves your browser.</div>
       <div class="card-head"><div><h2>Required for the report</h2><p class="sub" id="readyLine"></p></div>
         <div class="controls"><button class="btn" id="samples" type="button">Load sample documents</button><button class="btn" id="reset" type="button">Start over</button></div></div>
       <div class="checks" id="checklist"></div>
-      <label class="drop" id="drop" style="position:relative;display:block;margin-bottom:16px">
+      <label class="drop" id="drop">
         <input type="file" id="files" multiple accept=".pdf,.png,.jpg,.jpeg,.txt">
         <b>Drop files here, or click to choose</b>
         <span class="muted">Mill test certificates, steel and fuel invoices, production records. PDF, photo or text.</span>
       </label>
-      <section class="card"><div class="card-head"><div><h2>Uploaded files</h2><p class="sub">What we read from each file in this session</p></div>
-        <a class="btn small" id="samplePack" href="#/documents">Download sample files</a></div>
-        <div class="table-wrap" id="uploads"></div></section>
+      <div id="uploadNotes"></div>
+      <div class="card-head" style="margin-top:8px"><div><h2>Check what we read</h2><p class="sub" id="reviewLine">Values count toward your number only after you confirm them. Fix anything that is wrong.</p></div>
+        <div class="controls"><a class="btn small" id="samplePack" href="#/documents">Download sample files</a><button class="btn small primary" id="confirmAll" type="button">Confirm all as read</button></div></div>
+      <div class="review-grid" id="reviewGrid"></div>
     </section>
 
     <!-- Dashboard -->
     <section id="view-dashboard" data-title="Dashboard" data-sub="Embedded emissions for bolts and nuts (CN 7318) under the EU carbon border tax" hidden>
       <div id="dashEmpty" class="card empty" hidden><b>No numbers yet</b><p>Upload the plant's documents, or load the samples, to see the analytics.</p><a class="btn primary" href="#/documents">Go to documents</a></div>
       <div id="dash">
+        <div id="reviewBanner"></div>
+        <div id="attention"></div>
         <div class="kpis" id="kpis"></div>
         <div class="grid2">
           <section class="card"><div class="card-head"><div><h2>EU importer's CBAM cost for 1,000 t</h2><p class="sub">2026–2034, €75 per tCO2, payable share rising to 100%</p></div>
-            <div class="legend"><span><i style="background:var(--bad)"></i>All steel on defaults</span><span><i style="background:var(--acc)"></i>Your data</span></div></div>
+            <div class="legend"><span><i style="background:var(--orange)"></i>All steel on defaults</span><span><i style="background:var(--acc)"></i>Your data</span></div></div>
             <div id="costChart"></div></section>
           <section class="card" id="mix"></section>
         </div>

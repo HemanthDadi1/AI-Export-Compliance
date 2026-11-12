@@ -1,6 +1,8 @@
-# Niryaat: carbon compliance for exporters (CBAM first)
+# CImEx Compliance: carbon compliance for exporters (CBAM first)
 
-A carbon compliance platform. The first product, CBAM, lets a clerk at a metal plant produce EU carbon-border data for fasteners (CN 7318) that a verifier can check. The homepage has a Products menu; CBAM opens the dashboard, and other rules (Scope 1–3, India CCTS, California SB 253) are planned on the same document layer. "Niryaat" is a working name taken from the design references. Rename it in `docs/*.html`. AI reads the documents. Rules do the calculation. The app drafts the monitoring plan, lists the gaps still open, and creates a carbon compliance report once the required documents are in. A mill verified once serves every plant that buys from it.
+CImEx stands for Carbon Import Export.
+
+A carbon compliance platform. The first product, CBAM, lets a clerk at a metal plant produce EU carbon-border data for fasteners (CN 7318) that a verifier can check. The homepage has a Products menu; CBAM opens the dashboard, and other rules (Scope 1–3, India CCTS, California SB 253) are planned on the same document layer. "CImEx Compliance" is a working name taken from the design references. Rename it in `docs/*.html`. AI reads the documents. Rules do the calculation. The app drafts the monitoring plan, lists the gaps still open, and creates a carbon compliance report once the required documents are in. A mill verified once serves every plant that buys from it.
 
 **Website:** https://hemanthdadi1.github.io/AI-Export-Compliance/ (homepage, [app](https://hemanthdadi1.github.io/AI-Export-Compliance/app.html), [docs](https://hemanthdadi1.github.io/AI-Export-Compliance/docs.html), [simulation](https://hemanthdadi1.github.io/AI-Export-Compliance/simulation.html)). On the website the app runs the same Python engine in your browser with Pyodide, using made-up sample data.
 

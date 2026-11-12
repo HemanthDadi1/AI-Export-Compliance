@@ -1,4 +1,4 @@
-/* Niryaat: one stylesheet for the website and the app. Plain CSS, no build step.
+/* CImEx Compliance: one stylesheet for the website and the app. Plain CSS, no build step.
    Palette from the Trustworthy Anchor reference: Maritime #1E2A38, Steel Blue #3B5973, Ice #EBF1F5, Safety Orange #F0783C. */
 :root {
   --navy:#1E2A38; --steel:#3B5973; --ice:#EBF1F5; --orange:#F0783C;

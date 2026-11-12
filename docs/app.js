@@ -90,7 +90,7 @@ async function show() {
   if (on && nav.scrollWidth > nav.clientWidth) nav.scrollLeft = on.offsetLeft - nav.offsetLeft - 16;
   $("title").textContent = $(`view-${v}`).dataset.title;
   $("subtitle").textContent = $(`view-${v}`).dataset.sub;
-  document.title = `${$("title").textContent} · CBAM · Niryaat`;
+  document.title = `${$("title").textContent} · CBAM · CImEx Compliance`;
   await ({documents, dashboard, log: monthlyLog, mills, report})[v]();
 }
 

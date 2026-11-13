@@ -57,6 +57,7 @@ select, input, textarea { font:inherit; color:var(--ink); background:var(--surfa
 .side { min-width:0; background:var(--navy); color:#B9C5D2; padding:16px 12px; position:sticky; top:0; height:100vh; display:flex; flex-direction:column; }
 .brand { display:flex; align-items:center; gap:10px; padding:4px 8px 16px; text-decoration:none; color:#fff; }
 .mark { width:32px; height:32px; border-radius:9px; background:var(--orange); color:#1E2A38; display:grid; place-items:center; font-weight:800; font-size:15px; flex:none; }
+.brand .mark { color:#1E2A38; }
 .brand b { display:block; font-size:15px; color:#fff; } .brand span { font-size:12px; color:#93A4B6; }
 .side nav { display:flex; flex-direction:column; gap:2px; }
 .side nav a { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; color:#B9C5D2; text-decoration:none; font-weight:500; white-space:nowrap; }
@@ -276,3 +277,17 @@ section[id], .band { scroll-margin-top:72px; }
 .chain .card { position:relative; } .chain .card p { font-size:13px; }
 .chain .card:not(:last-child)::after { content:"→"; position:absolute; right:-12px; top:50%; transform:translate(50%, -50%); color:var(--mute); z-index:1; }
 @media (max-width:900px) { .chain { grid-template-columns:minmax(0, 1fr); } .chain .card:not(:last-child)::after { content:"↓"; right:auto; left:50%; top:auto; bottom:-14px; transform:translate(-50%, 0); } .rule { flex-direction:column; } }
+
+/* Homepage: sample-plant numbers and dashboard picture */
+.stats { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:12px; margin-bottom:20px; }
+.stats b { display:block; font-size:28px; letter-spacing:-.02em; color:var(--ink); }
+.stats span { color:var(--mute); font-size:13px; }
+.shot { display:block; border-radius:14px; overflow:hidden; border:1px solid var(--line); box-shadow:0 18px 40px rgba(30,42,56,.14); }
+.shot img { display:block; width:100%; height:auto; }
+@media (max-width:760px) {
+  .stats { grid-template-columns:minmax(0, 1fr); } .stats .card { padding:14px; } .stats b { font-size:24px; }
+  .compare th:nth-child(4), .compare td:nth-child(4) { display:none; }
+  .compare td:first-child { min-width:110px; } .compare th { white-space:normal; }
+  .band { padding:40px 0; } .band h2 { font-size:26px; }
+}
+@media (max-width:480px) { .hide-sm { display:none; } .hero h1 { font-size:30px; } .hero .cta .btn { flex:1; } }

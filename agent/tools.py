@@ -60,13 +60,13 @@ def draft_mill_request(mill: str, year: int = YEAR):
     heats = "\n".join(f"  - Heat {h['heat']}: {h['tonnes']:g} t" for h in m["heats"])
     email = (f"Dear {mill} team,\n\n"
              f"Our EU buyers now need the embedded emissions of the steel in our goods under the EU carbon border "
-             f"adjustment mechanism (CBAM). In {year} we used {m['tonnes']:g} t of your wire rod:\n{heats}\n\n"
+             f"adjustment mechanism (CBAM). In the period we report, we used {m['tonnes']:g} t of your wire rod:\n{heats}\n\n"
              "Without your data, our buyers must use the EU default value plus a penalty mark-up.\n\n"
              "Could you share the embedded emissions of this steel, in tCO2 per tonne, with the verification "
              "report from an accredited verifier? A value for your plant and product route is enough.\n\n"
              "Every customer of yours that uses our system will be able to reuse it.\n\n"
              f"Regards,\n{p['name'].replace(' (your plant)', '')}")
-    return {"mill": mill, "subject": f"Request for verified CBAM emissions data: {m['tonnes']:g} t of wire rod, {year}",
+    return {"mill": mill, "subject": f"Request for verified CBAM emissions data: {m['tonnes']:g} t of wire rod",
             "email": email}
 
 

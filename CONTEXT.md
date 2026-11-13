@@ -113,5 +113,5 @@ Removed from decks because unsourced: Rs 50 to 500 crore plant size, 403 verifie
 2. Run one real certificate through Gemini and record the result.
 3. Run the interview kit with 15 to 20 exporters. Sell three paid exposure checks.
 4. Confirm the EU default values and replace the working steel figure.
-5. Build the ADK review agent for the city round. The plan is in `mvp/AGENT_PLAN.md`.
+5. Build the ADK review agent for the city round. The plan is in `mvp/AGENT_PLAN.md`. Tools, tests, agent.py, skill.md and run.py are written. The first live Gemini run is pending: on 13 Nov the model was busy. Run it from `mvp/` with `~/.venvs/cimex/bin/python -m agent.run` after setting `GOOGLE_API_KEY`. Then update the PDF's models slide to the model that worked.
 6. Host on Cloud Run with Vertex AI.

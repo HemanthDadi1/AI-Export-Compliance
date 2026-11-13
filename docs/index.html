@@ -10,7 +10,7 @@
 <body>
 <header class="site-head">
   <div class="site">
-    <a class="brand" href="index.html"><span class="mark">C</span><span><b>CImEx Compliance</b></span></a>
+    <a class="brand" href="index.html"><img class="mark" src="mark.svg" alt=""><span><b>CImEx Compliance</b></span></a>
     <nav aria-label="Main">
       <details class="menu" id="productMenu">
         <summary>Products</summary>
@@ -65,7 +65,14 @@
         <div class="card"><b>€849,075</b><span>less for its EU importer to 2034 than the EU default</span></div>
         <div class="card"><b>4 gaps</b><span>found and listed before a verifier sees the file</span></div>
       </div>
-      <a class="shot" href="app.html"><img src="dashboard.jpg" width="1200" height="703" loading="lazy" alt="The CBAM dashboard for the sample plant: 4.38 tCO2 per tonne, 37% of steel on verified mill data, EUR 1,427,628 importer cost to 2034, 4 open checks, and a chart of cost on the EU default against the plant's own data."></a>
+      <figure class="card mix" aria-labelledby="mixTitle">
+        <div class="mix-head"><div><h3 id="mixTitle">Where the carbon in one tonne of bolts comes from</h3><p>tCO2 per tonne, reporting year 2027</p></div>
+          <div class="legend"><span><i class="c-own"></i>Own furnaces</span><span><i class="c-ver"></i>Steel, verified mill data</span><span><i class="c-def"></i>Steel, EU default plus mark-up</span></div></div>
+        <div class="mix-row"><span class="mix-label">EU default for bolts, before mark-up</span><div class="mix-bar"><span class="c-ref" style="width:95.3%" title="EU default for bolts (CN 7318 15): 5.72"></span><b>5.72</b></div></div>
+        <div class="mix-row"><span class="mix-label">The plant today</span><div class="mix-bar"><span class="c-own" style="width:3.3%" title="Own furnaces: 0.20"></span><span class="c-ver" style="width:13.3%" title="Steel, verified mill data: 0.80"></span><span class="c-def" style="width:56.3%" title="Steel, EU default plus mark-up: 3.38"></span><b>4.38</b></div></div>
+        <div class="mix-row"><span class="mix-label">Once its main mill shares data</span><div class="mix-bar"><span class="c-own" style="width:3.3%" title="Own furnaces: 0.20"></span><span class="c-ver" style="width:34.2%" title="Steel, verified mill data: 2.05"></span><b>2.25</b></div></div>
+        <figcaption>The mill supplies 63% of the steel. Its verified value replaces the default for that steel. <a href="app.html">Open the dashboard</a> to see each figure's source.</figcaption>
+      </figure>
     </div>
   </section>
 

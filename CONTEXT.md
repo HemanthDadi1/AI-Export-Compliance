@@ -113,5 +113,5 @@ Removed from decks because unsourced: Rs 50 to 500 crore plant size, 403 verifie
 2. Run one real certificate through Gemini and record the result.
 3. Run the interview kit with 15 to 20 exporters. Sell three paid exposure checks.
 4. Confirm the EU default values and replace the working steel figure.
-5. Plan the ADK review agent build for the city round.
+5. Build the ADK review agent for the city round. The plan is in `mvp/AGENT_PLAN.md`.
 6. Host on Cloud Run with Vertex AI.

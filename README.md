@@ -6,7 +6,7 @@ A carbon compliance platform. The first product, CBAM, lets a clerk at a metal p
 
 **Website:** https://cimex-compliance.vercel.app (also on GitHub Pages: https://hemanthdadi1.github.io/AI-Export-Compliance/) (homepage, [app](https://hemanthdadi1.github.io/AI-Export-Compliance/app.html), [docs](https://hemanthdadi1.github.io/AI-Export-Compliance/docs.html), [simulation](https://hemanthdadi1.github.io/AI-Export-Compliance/simulation.html)). On the website the app runs the same Python engine in your browser with Pyodide, using made-up sample data.
 
-**Pitch:** [Startup Buildathon idea submission (PDF)](pitch/CImEx-Buildathon-Idea-Submission.pdf) and the [architecture diagram](pitch/architecture.png).
+**Pitch:** [Startup Buildathon idea submission (PDF)](pitch/CImEx-Buildathon-Idea-Submission.pdf) and the [architecture diagram](pitch/architecture.png). The Buildathon build is planned in [AGENT_PLAN.md](AGENT_PLAN.md).
 
 ## Run
 

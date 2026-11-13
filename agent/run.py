@@ -44,7 +44,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except Exception as e:  # show the API's reason, not a long traceback
         code, msg = getattr(e, "code", None), getattr(e, "message", None) or str(e)
-        if code == 401:
+        if code == 401 or "API key not valid" in msg:
             raise SystemExit("Gemini rejected the key. Use an API key from Google AI Studio (it starts with AIza), "
                              "not an access token or a Cloud service account key.")
         raise SystemExit(f"The agent stopped: {code or type(e).__name__} {msg}")

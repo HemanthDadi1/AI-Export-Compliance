@@ -11,6 +11,10 @@ def test_fuel():
         try: fuel_tco2(*bad); assert False
         except ValueError: pass
 
+def test_steel_default_is_the_official_india_value():
+    assert DEFAULT_PRECURSOR_SEE == 4.27  # Reg (EU) 2025/2621 Annex I, India, CN 7213, as corrected by 2026/1740
+
+
 def test_default_has_markup():
     r = compute(plant([{"supplier": "X", "tonnes": 100}]), {}, 2027)
     assert abs(r["see_precursor"] - DEFAULT_PRECURSOR_SEE * 1.2) < 1e-9

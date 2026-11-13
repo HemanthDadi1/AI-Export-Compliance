@@ -66,16 +66,16 @@ Not built: hosting on Cloud Run, accounts and storage, the ADK review agent, shi
 ## Numbers and their status
 
 Checked against the engine (demo data, reporting year 2027):
-- Sample plant: 4.40 tCO2/t (0.20 own furnaces, 4.20 steel). 2.25 after Rayalaseema shares 1.9 verified. Other plants: 4.65 to 2.14, 5.53 to 2.13, 5.42 to 3.50.
+- Sample plant: 4.38 tCO2/t (0.20 own furnaces, 4.18 steel). 2.25 after Rayalaseema shares 1.9 verified. Other plants: 4.62 to 2.14, 5.49 to 2.13, 5.38 to 3.48. (Before 13 Nov the default was 4.3 and the plant showed 4.40; the submitted PDF still says 4.40.)
 
 From EU rules, as researched (recheck before quoting):
+- Steel default 4.27 tCO2/t for India non-alloy wire rod (CN 7213), before mark-up. Reg (EU) 2025/2621 Annex I, as corrected by 2026/1740. Checked on EUR-Lex 13 Nov 2026. Alloy wire rod (CN 7227): 7.30. Product defaults: bolts (CN 7318 15) 5.72, nuts (CN 7318 16) 5.14.
 - Payable share 2.5% (2026), 5%, 10%, 22.5%, 48.5%, 61%, 73.5%, 86%, 100% (2034).
 - Default mark-up 10% (2026), 20% (2027), 30% from 2028.
 - First annual declaration due 30 Sep 2027.
 - India sold EUR 5.30 bn of CBAM-covered goods to the EU in 2025 (Eurostat Comext via CBAMGuide).
 
 Not confirmed:
-- Steel default 4.3 tCO2/t (India wire rod) is from a secondary source citing Reg (EU) 2025/2621, possibly replaced by 2026/1740. Check the Official Journal.
 - Whether Gemini models run on Vertex AI in Mumbai.
 - All prices: exposure check Rs 25,000 to 50,000; programme Rs 3 to 6 lakh per plant; annual care Rs 1.5 to 3 lakh. Untested with customers.
 - Expert hours saved per plant. Not measured.

@@ -1,11 +1,9 @@
 """Rule-based CBAM calculation. No AI here. The final number comes only from this file."""
 
-# Placeholders. Replace with the EC default values file before any real use.
-# India default for wire rod and bars (CN 7213/7214), direct emissions, before the mark-up: 4.27-4.32 tCO2/t.
-# Source: Implementing Regulation (EU) 2025/2621, Annex I, as reported by GreenSutra (secondary). CBAMGuide says that
-# annex was replaced by Implementing Regulation (EU) 2026/1740, so check the current Official Journal table before use.
-# CN 7318 itself was not listed on that page, so the product default is not used here.
-DEFAULT_PRECURSOR_SEE = 4.3
+# India default for non-alloy wire rod (CN 7213), direct emissions, tCO2 per tonne, before the mark-up.
+# Source: Implementing Regulation (EU) 2025/2621, Annex I (India), as corrected by 2026/1740. Checked on EUR-Lex, 13 Nov 2026.
+# shortcut: one value for all steel. Alloy wire rod (CN 7227) is 7.30, so alloy-steel bolts need a second value.
+DEFAULT_PRECURSOR_SEE = 4.27
 EUA_PRICE = 75.0             # EUR per tCO2, assumed flat
 
 # Share of the CBAM charge that is payable, by year.

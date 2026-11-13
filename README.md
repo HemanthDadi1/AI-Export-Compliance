@@ -63,7 +63,7 @@ The URL is public and has no login. Anyone with it can upload or reset. Share it
 1. Open the app. **Documents** shows four required items, all missing. **Create carbon compliance report** is locked.
 2. Click **Load sample documents**: 6 mill test certificates, 1 steel invoice, 3 fuel invoices and 1 production record. One certificate gives only coils, so its tonnes come from the trader's invoice for the same heat. Four items turn green. The fifth, **Extracted values confirmed**, stays open, and the report stays locked.
 3. Under **Check what we read**, each file is a card with its values and source line. Change a value (say LPG 30 t to 29), then **Confirm**, or press **Confirm all as read**. The report unlocks. Corrections are listed in it.
-4. **Dashboard**: an Attention card names the biggest gap and copies a request email to the mill. The plant shows 4.40 tCO2/t. Own furnaces add only 0.20. Most of it is Rayalaseema steel on the default value with a penalty.
+4. **Dashboard**: an Attention card names the biggest gap and copies a request email to the mill. The plant shows 4.38 tCO2/t. Own furnaces add only 0.20. Most of it is Rayalaseema steel on the default value with a penalty.
 5. **Mills**: add verified data for Rayalaseema, 1.9. The plant drops to 2.25, and three other plants that buy from the same mill drop too.
 6. **Monthly log**: click **Load sample log**. LPG now counts fuel used (52 t), not fuel bought (56 t).
 7. **Create carbon compliance report**: summary, method, every figure with its source document and line, who checked it and what they changed, open gaps, and signature lines. Print it or save it as a PDF, or download the EU supplier template as a CSV.
@@ -79,7 +79,7 @@ The URL is public and has no login. Anyone with it can upload or reset. Share it
 
 ## Not real yet
 
-- The steel default (4.3 tCO2/t, India wire rod and bars, before the mark-up) comes from a secondary source citing Regulation (EU) 2025/2621. That annex may have been replaced by 2026/1740. Check the current Official Journal table. CN 7318 itself was not listed, so no fastener default is used. The demo mill values (2.1 and 1.9) are made up.
+- The steel default is 4.27 tCO2/t for Indian non-alloy wire rod (CN 7213), before the mark-up. It comes from Implementing Regulation (EU) 2025/2621, Annex I, as corrected by 2026/1740 (checked on EUR-Lex, 13 Nov 2026). Alloy wire rod (CN 7227) is 7.30, and the engine does not handle it yet. The EU also lists product defaults for fasteners, for example 5.72 for threaded screws and bolts (CN 7318 15) and 5.14 for nuts (CN 7318 16). The demo mill values (2.1 and 1.9) are made up.
 - Data is kept in memory. A restart clears it. On the website it lives in the browser tab.
 - No login, and no edit step for extracted values.
 - The homepage sign-up form needs a team inbox: set `CONTACT_EMAIL` in `docs/index.html`.

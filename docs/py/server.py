@@ -325,7 +325,7 @@ def audit(year):
             "review": {"documents": len(docs), "confirmed": sum(d["reviewed"] for d in docs.values()),
                        "edited": sum(bool(d["edits"]) for d in docs.values()), "edits": edits}, "plan": plan(p), "method": plan(p)["lines"],
             "checks": p["checks"] + log_checks(p),
-            "default_note": f"Steel default used: {DEFAULT_PRECURSOR_SEE} tCO2/t before the mark-up. Secondary source. Check it against the current EU table.",
+            "default_note": f"Steel default used: {DEFAULT_PRECURSOR_SEE} tCO2/t before the mark-up, India wire rod (CN 7213), Implementing Regulation (EU) 2025/2621 as corrected by 2026/1740.",
             "draft": "Draft. Not verified. Indirect emissions are not counted for iron and steel goods."}
 
 

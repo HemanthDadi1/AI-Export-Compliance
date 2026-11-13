@@ -70,7 +70,7 @@
     <pre>embedded emissions per tonne = (direct emissions + Σ steel tonnes × steel value) ÷ output tonnes</pre>
     <ul>
       <li><b>Direct emissions:</b> fuel used × emission factor. LPG 2.985 tCO2 per tonne, diesel 3.186 tCO2 per tonne, natural gas 0.00195 tCO2 per m3.</li>
-      <li><b>Steel value:</b> the mill's verified value when it has shared one. Otherwise the EU default for Indian wire rod, 4.3 tCO2 per tonne before the mark-up. This default comes from a secondary source and is not yet confirmed against the EU table.</li>
+      <li><b>Steel value:</b> the mill's verified value when it has shared one. Otherwise the EU default for Indian non-alloy wire rod (CN 7213), 4.27 tCO2 per tonne before the mark-up, from Implementing Regulation (EU) 2025/2621 as corrected by 2026/1740. Alloy wire rod has a higher default, 7.30, which the app does not handle yet.</li>
       <li><b>Mark-up on defaults:</b> 10% in 2026, 20% in 2027, 30% from 2028.</li>
       <li><b>Indirect emissions</b> (electricity) are not counted for iron and steel goods.</li>
     </ul>
@@ -102,7 +102,7 @@ VERTEX_PROJECT=your-project python3 server.py   # Gemini on Vertex AI, Mumbai</p
     <h2 id="limits">Limits</h2>
     <ul>
       <li>The website demo reads text documents in the sample format only. Real PDFs and photos need a server with Gemini.</li>
-      <li>The steel default value is not yet confirmed against the official EU table.</li>
+      <li>Only the non-alloy steel default is used. Bolts made from alloy steel need the alloy default.</li>
       <li>Only one product group (CN 7318) and one output figure per plant.</li>
       <li>There are no user accounts yet. Each session starts empty.</li>
     </ul>

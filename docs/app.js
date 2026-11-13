@@ -221,7 +221,7 @@ function costChart(curve) {
   const line = k => curve.map((c, i) => `${x(i)},${y(c[k])}`).join(" ");
   return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="CBAM cost by year, on default values and with your data">${g}
     <polygon class="f-area" points="${x(0)},${y(0)} ${line("yours")} ${x(curve.length - 1)},${y(0)}"/><polyline class="s-bad" points="${line("default")}"/><polyline class="s-acc" points="${line("yours")}"/>
-    ${curve.map((c, i) => `<circle class="f-acc" cx="${x(i)}" cy="${y(c.yours)}" r="3.5"><title>${c.year}: ${eur(c.yours)} with your data, ${eur(c.default)} with all steel on defaults</title></circle>`).join("")}</svg>`;
+    ${curve.map((c, i) => `<circle class="f-acc" cx="${x(i)}" cy="${y(c.yours)}" r="3.5"><title>${c.year}: ${eur(c.yours)} with your data, ${eur(c.default)} on the EU default for your goods</title></circle>`).join("")}</svg>`;
 }
 
 async function dashboard() {
@@ -256,7 +256,7 @@ ${you.name.replace(" (your plant)", "")}`;
   $("kpis").innerHTML =
     kpi("Embedded emissions", f(you.see_total), "tCO2/t", `<span class="pill ${you.verified_share < 1 ? "warn" : "ok"}">${pct(1 - you.verified_share)}</span> of steel on defaults`) +
     kpi("Steel on verified mill data", pct(you.verified_share), "", `<span class="pill info">${steel.length - steel.filter(r => r.basis.startsWith("default")).length} of ${steel.length}</span> heats on actual values`) +
-    kpi("Importer cost, 2026–2034", eur(yours), "", all - yours > 1 ? `<span class="pill ok">−${eur(all - yours)}</span> against all defaults` : "Same as all defaults") +
+    kpi("Importer cost, 2026–2034", eur(yours), "", all - yours > 1 ? `<span class="pill ok">−${eur(all - yours)}</span> against the EU default` : "No saving against the EU default") +
     kpi("Open checks", open.length, "", open.length ? `<span class="pill warn">To close</span> before a verifier signs` : `<span class="pill ok">None</span>`);
   $("costChart").innerHTML = costChart(you.curve);
   const seg = (cls, v) => `<span class="${cls}" style="width:${Math.max(v, 0) / you.see_total * 100}%"></span>`;

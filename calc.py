@@ -6,6 +6,11 @@
 DEFAULT_PRECURSOR_SEE = 4.27
 EUA_PRICE = 75.0             # EUR per tCO2, assumed flat
 
+# India defaults for the finished goods (total emissions, before the mark-up), same source as above.
+# An importer with no supplier data uses these. Keys are CN codes without spaces.
+PRODUCT_DEFAULTS = {"731815": 5.72, "731816": 5.14, "731822": 5.14}
+BOLTS = "731815"  # shortcut: goods with no or unknown CN code count as bolts, the demo's product
+
 # Share of the CBAM charge that is payable, by year.
 PAYABLE = {2026: .025, 2027: .05, 2028: .10, 2029: .225, 2030: .485,
            2031: .61, 2032: .735, 2033: .86, 2034: 1.0}
@@ -32,6 +37,15 @@ def fuel_tco2(fuel, qty, unit):
     if tonnes is None:
         raise ValueError(f"unknown unit {unit}")
     return tonnes * per_t
+
+
+def product_default(output_lines):
+    """EU default per tonne of goods, weighted by output. Matches the longest known CN prefix."""
+    tot = sum(o["tonnes"] for o in output_lines)
+    def per_t(cn):
+        code = "".join(ch for ch in str(cn or "") if ch.isdigit())
+        return next((v for k, v in PRODUCT_DEFAULTS.items() if code.startswith(k)), PRODUCT_DEFAULTS[BOLTS])
+    return sum(o["tonnes"] * per_t(o.get("cn")) for o in output_lines) / tot
 
 
 def compute(plant, suppliers, year=2027, price=EUA_PRICE):
@@ -69,12 +83,11 @@ def compute(plant, suppliers, year=2027, price=EUA_PRICE):
     def see_total(y):
         return (direct + precursor_total(y)) / output
 
+    goods_default = product_default(plant["output"])
     curve = []
     for y in range(2026, 2035):
-        ours = see_total(y)
-        dflt = (direct + sum(p["tonnes"] for p in precursors) * DEFAULT_PRECURSOR_SEE * (1 + markup(y))) / output
-        curve.append({"year": y, "yours": ours * PAYABLE[y] * price * 1000,
-                      "default": dflt * PAYABLE[y] * price * 1000})  # EUR for 1,000 t. "default" = all steel on defaults
+        curve.append({"year": y, "yours": see_total(y) * PAYABLE[y] * price * 1000,
+                      "default": goods_default * (1 + markup(y)) * PAYABLE[y] * price * 1000})  # EUR for 1,000 t
 
     steel_t = sum(p["tonnes"] for p in precursors)
     return {"id": plant["id"], "name": plant["name"], "empty": False, "year": year,
@@ -82,4 +95,4 @@ def compute(plant, suppliers, year=2027, price=EUA_PRICE):
             "precursors": precursors, "see_direct": direct / output,
             "see_precursor": precursor_total(year) / output, "see_total": see_total(year),
             "verified_share": sum(p["tonnes"] for p in precursors if p["basis"] == "actual") / steel_t if steel_t else 0,
-            "curve": curve}
+            "product_default": goods_default, "curve": curve}

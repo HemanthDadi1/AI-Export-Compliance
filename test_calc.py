@@ -30,15 +30,28 @@ def test_curve():
     c = compute(plant([{"supplier": "X", "tonnes": 100}]), {}, 2027)["curve"]
     assert c[0]["year"] == 2026 and c[-1]["year"] == 2034 and c[-1]["yours"] > c[0]["yours"]
 
-def test_curve_default_means_steel_on_defaults():
+def test_curve_default_is_the_eu_default_for_the_goods():
+    # Without supplier data, the importer uses the EU default for the good itself, not for its steel.
+    bolts = plant([{"supplier": "X", "tonnes": 100}]); bolts["output"] = [{"tonnes": 100, "cn": "7318 15"}]
+    c = compute(bolts, {}, 2027)["curve"]
+    assert abs(c[1]["default"] - 5.72 * 1.2 * 0.05 * 75 * 1000) < 1e-6   # 2027: 20% mark-up, 5% payable
+    assert abs(c[4]["default"] - 5.72 * 1.3 * 0.485 * 75 * 1000) < 1e-6  # 2030: 30% mark-up
+
+
+def test_product_default_follows_the_cn_code_and_output_mix():
+    p = plant([{"supplier": "X", "tonnes": 100}])
+    p["output"] = [{"tonnes": 60, "cn": "731815 90"}, {"tonnes": 40, "cn": "7318 16"}]  # bolts and nuts
+    r = compute(p, {}, 2026)
+    assert abs(r["product_default"] - (0.6 * 5.72 + 0.4 * 5.14)) < 1e-9
+    p["output"] = [{"tonnes": 100, "cn": None}]  # no CN code read: assume bolts
+    assert compute(p, {}, 2026)["product_default"] == 5.72
+
+
+def test_verified_mill_widens_the_gap_to_the_default():
     steel = [{"supplier": "X", "tonnes": 100}]
-    none = compute(plant(steel), {}, 2027)["curve"]
-    assert all(abs(c["yours"] - c["default"]) < 1e-6 for c in none)  # no verified mill, so the two lines match
-    ver = compute(plant(steel), {"X": {"verified": True, "see": 1.9}}, 2027)["curve"]
-    assert all(v["yours"] < v["default"] for v in ver)
-    # 2030: (30 t of LPG fuel... direct 298.5 + 100 t steel at default with 30% markup) / 100 t output * 48.5% * EUR 75 * 1000 t
-    want = (298.5 + 100 * DEFAULT_PRECURSOR_SEE * 1.3) / 100 * 0.485 * 75 * 1000
-    assert abs(none[4]["default"] - want) < 1e-6
+    a = compute(plant(steel), {}, 2027)["curve"]
+    b = compute(plant(steel), {"X": {"verified": True, "see": 1.9}}, 2027)["curve"]
+    assert all(y["default"] - y["yours"] > x["default"] - x["yours"] for x, y in zip(a, b))
 
 
 def test_empty():

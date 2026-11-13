@@ -57,7 +57,7 @@ Python standard library only. No packages.
 - Tests: 9 files, `test_*.py`. Run: `for t in test_*.py; do python3 $t || break; done`
 - After changing the engine or demo files: `python3 make_pages.py`. After changing the simulation: `python3 simulate.py --write`.
 - Run locally: `python3 server.py`, then open http://localhost:8000
-- Gemini: set `GEMINI_API_KEY`, or `VERTEX_PROJECT` for Vertex AI. Default model `gemini-2.5-flash`, default region `asia-south1`.
+- Gemini: set `GEMINI_API_KEY`, or `VERTEX_PROJECT` for Vertex AI. Default model `gemini-3.8-flash` (2.5 Flash is closed to new API users; the submitted PDF still names 2.5 Flash), default region `asia-south1`.
 
 Built and tested: upload, Gemini reading, review and confirm with edit log, heat matching, gap checks, monthly fuel log, mill view, rule engine, cost curve to 2034, report, verifier pack, EU CSV, duplicate-file refusal, homepage rule finder.
 

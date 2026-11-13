@@ -6,7 +6,7 @@ from google.adk.agents import Agent
 
 from agent import tools
 
-MODEL = os.environ.get("AGENT_MODEL", "gemini-2.5-flash")  # try gemini-2.5-pro if Flash misses checks
+MODEL = os.environ.get("AGENT_MODEL", "gemini-3.8-flash")  # 2.5 Flash is closed to new API users; set AGENT_MODEL to try others
 
 root_agent = Agent(
     name="cimex_review_agent",

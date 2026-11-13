@@ -49,7 +49,7 @@ Each tool calls `server.dispatch(...)`, the same router the website uses. Nothin
 ## Build on Google
 
 - **Agent Development Kit (Python, `google-adk`).** One `LlmAgent` with the five tools above as function tools.
-- **Model:** Gemini 2.5 Flash first. Try Gemini 2.5 Pro on the same test if Flash misses checks or ranks badly.
+- **Model:** Gemini 3.8 Flash first (Gemini 2.5 Flash is closed to new API users). Try a larger Gemini model on the same test if Flash misses checks or ranks badly. Set `AGENT_MODEL` to switch.
 - **Agent Skills:** one skill file with the CBAM review rules in plain words (what a verifier rejects, why fuel bought is not fuel used, why mill data matters most).
 - **Hosting:** Cloud Run, next to the existing app. The website keeps working without the agent.
 - **Antigravity:** use it to build and test the agent during the event.

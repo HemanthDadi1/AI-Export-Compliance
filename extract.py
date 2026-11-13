@@ -43,7 +43,7 @@ def _vertex_token():
 
 
 def _gemini(m, mime, raw):
-    model = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+    model = os.environ.get("GEMINI_MODEL", "gemini-3.8-flash")  # 2.5 Flash is closed to new API users
     part = ({"text": raw.decode("utf-8", "replace")} if mime.startswith("text/")
             else {"inlineData": {"mimeType": mime, "data": base64.b64encode(raw).decode()}})
     body = {"contents": [{"role": "user", "parts": [{"text": PROMPT}, part]}],

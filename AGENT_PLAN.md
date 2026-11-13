@@ -63,6 +63,7 @@ agent/
   agent.py      LlmAgent: instructions, model, tools
   tools.py      the five tools, thin wrappers over server.dispatch
   skill.md      CBAM review rules for the agent
+  run.py        runs the agent on the sample plant: python3 -m agent.run
 test_agent_tools.py   tools return the right facts on the sample plant (no model call)
 ```
 

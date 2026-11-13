@@ -20,7 +20,7 @@ Goal framing: "the $15-an-hour expert". A clerk produces expert-grade, verifier-
 ## Links
 
 - Repo (public, MIT): https://github.com/HemanthDadi1/AI-Export-Compliance
-- Live site and demo: https://hemanthdadi1.github.io/AI-Export-Compliance/
+- Live site and demo: https://cimex-compliance.vercel.app (Vercel, redeploys on every push). Also on GitHub Pages: https://hemanthdadi1.github.io/AI-Export-Compliance/
 - App: `app.html`. Docs: `docs.html`. Simulation: `simulation.html`.
 - Buildathon submission PDF: `CImEx-Buildathon-Idea-Submission.pdf` (also in the repo under `pitch/`).
 

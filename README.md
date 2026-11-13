@@ -4,7 +4,7 @@ CImEx stands for Carbon Import Export.
 
 A carbon compliance platform. The first product, CBAM, lets a clerk at a metal plant produce EU carbon-border data for fasteners (CN 7318) that a verifier can check. The homepage has a Products menu; CBAM opens the dashboard, and other rules (Scope 1–3, India CCTS, California SB 253) are planned on the same document layer. AI reads the documents. Rules do the calculation. The app drafts the monitoring plan, lists the gaps still open, and creates a carbon compliance report once the required documents are in. A mill verified once serves every plant that buys from it.
 
-**Website:** https://hemanthdadi1.github.io/AI-Export-Compliance/ (homepage, [app](https://hemanthdadi1.github.io/AI-Export-Compliance/app.html), [docs](https://hemanthdadi1.github.io/AI-Export-Compliance/docs.html), [simulation](https://hemanthdadi1.github.io/AI-Export-Compliance/simulation.html)). On the website the app runs the same Python engine in your browser with Pyodide, using made-up sample data.
+**Website:** https://cimex-compliance.vercel.app (also on GitHub Pages: https://hemanthdadi1.github.io/AI-Export-Compliance/) (homepage, [app](https://hemanthdadi1.github.io/AI-Export-Compliance/app.html), [docs](https://hemanthdadi1.github.io/AI-Export-Compliance/docs.html), [simulation](https://hemanthdadi1.github.io/AI-Export-Compliance/simulation.html)). On the website the app runs the same Python engine in your browser with Pyodide, using made-up sample data.
 
 **Pitch:** [Startup Buildathon idea submission (PDF)](pitch/CImEx-Buildathon-Idea-Submission.pdf) and the [architecture diagram](pitch/architecture.png).
 

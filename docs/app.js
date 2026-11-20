@@ -56,7 +56,8 @@ async function call(method, path, query = {}, body = null) {
 
 function download(name, content, type) {
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([content], {type}));
+  const blob = content instanceof Blob ? content : new Blob([content], {type});
+  a.href = URL.createObjectURL(blob);
   a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
@@ -161,7 +162,7 @@ function patchOf(d, dr) {
 async function documents() {
   $("browserNote").hidden = S.mode !== "browser";
   const r = S.ready, total = S.docs.length, ok = S.docs.filter(d => d.reviewed).length;
-  $("readyLine").textContent = r.ready ? "Everything required is in and confirmed. You can create the report." : `${r.done} of ${r.total} required items are done.`;
+  $("readyLine").textContent = r.ready ? "✓ Verifier Ready: 100% · All required items confirmed. You can create the report." : `Verifier Readiness: ${r.score ?? 0}% · ${r.done} of ${r.total} required items confirmed.`;
   $("checklist").innerHTML = r.items.map(i => `<div class="card check"><span class="tick ${i.done ? "on" : ""}" aria-hidden="true">✓</span>
     <div><b>${esc(i.label)}</b><p>${esc(i.hint)}</p><span class="pill ${i.done ? "ok" : i.required ? "warn" : "info"}">${i.done ? "Done" : i.required ? "Required" : "Recommended"}</span></div></div>`).join("");
   $("uploadNotes").innerHTML = S.notes.length ? `<div class="notice no-print">${S.notes.map(n => `<div><b>${esc(n.file)}</b>: ${esc(n.error)}</div>`).join("")} <button class="linklike" id="dismissNotes" type="button">Dismiss</button></div>` : "";
@@ -323,6 +324,64 @@ async function dashboard() {
     ${[["c-direct", "Own furnaces (fuel)", you.see_direct], ["c-ok", "Steel, verified mill value", ver], ["c-bad", "Steel, EU default plus penalty", dft]]
       .map(([c, l, v]) => `<div class="rowline"><span><i class="${c}" style="display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px"></i>${l}</span><b>${f(v)} <span class="muted">${pct(v / you.see_total)}</span></b></div>`).join("")}
     <p class="muted" style="margin-top:12px">Indirect emissions (electricity) are not counted for iron and steel goods.</p>`;
+
+  const mb = S.state.mass_balance || you.mass_balance;
+  if ($("massBalanceCard") && mb) {
+    $("massBalanceCard").innerHTML = `
+      <div class="card-head">
+        <div>
+          <h2>Physical Mass Balance & Yield</h2>
+          <p class="sub">Annex V verification mass check: raw steel consumed vs finished goods</p>
+        </div>
+        <span class="pill ${mb.valid ? "ok" : "bad"}">${mb.valid ? "✓ Mass Balanced" : "Breach"}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
+        <div style="background:var(--bg);padding:10px 12px;border-radius:6px;border:1px solid var(--line)">
+          <span class="muted" style="font-size:11px">Plant Yield Ratio</span>
+          <div style="font-size:20px;font-weight:700">${pct(mb.yield_ratio)}</div>
+          <span class="muted" style="font-size:11px">EU benchmark: ${pct(mb.benchmark_yield)}</span>
+        </div>
+        <div style="background:var(--bg);padding:10px 12px;border-radius:6px;border:1px solid var(--line)">
+          <span class="muted" style="font-size:11px">Process Scrap Loss</span>
+          <div style="font-size:20px;font-weight:700">${f(mb.scrap_t)} t</div>
+          <span class="muted" style="font-size:11px">${pct(mb.scrap_rate)} loss rate</span>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:10px;font-size:12px">
+        Specific Steel Consumption: <b>${f(mb.specific_consumption, 3)} t steel / t finished fastener</b>.
+        Input: ${f(mb.steel_input_t)} t · Output: ${f(mb.finished_output_t)} t.
+      </p>`;
+  }
+
+  const cl = S.state.carbon_ledger || [];
+  if ($("carbonLedgerCard")) {
+    $("carbonLedgerCard").innerHTML = `
+      <div class="card-head">
+        <div>
+          <h2>Carbon Depletion Ledger</h2>
+          <p class="sub">Prevents double-allocation across heats & export consignments</p>
+        </div>
+        <span class="pill info">${cl.length} Active Heats</span>
+      </div>
+      <div class="table-wrap" style="max-height:220px;overflow-y:auto;margin-top:8px">
+        <table>
+          <thead><tr><th>Heat No</th><th>Mill</th><th class="n">Purchased</th><th class="n">Allocated</th><th class="n">Balance</th><th>Status</th></tr></thead>
+          <tbody>
+            ${cl.length ? cl.map(item => `
+              <tr>
+                <td><b>${esc(item.heat_no)}</b></td>
+                <td>${esc(item.mill)}</td>
+                <td class="n">${f(item.purchased_t, 1)} t</td>
+                <td class="n">${f(item.allocated_t, 1)} t</td>
+                <td class="n">${f(item.remaining_t, 1)} t</td>
+                <td><span class="pill ${item.status === 'overdraft' ? 'bad' : item.status === 'active' ? 'ok' : 'info'}">${esc(item.status)}</span></td>
+              </tr>
+            `).join("") : '<tr><td colspan="6" class="muted">No heats recorded yet</td></tr>'}
+          </tbody>
+        </table>
+      </div>`;
+  }
+
   $("network").innerHTML = `<table><thead><tr><th>Plant</th><th>Steel on verified data</th><th class="n">tCO2/t</th></tr></thead><tbody>
     ${S.state.plants.filter(p => !p.empty).map((p, i) => `<tr><td>${i ? esc(p.name) : `<b>${esc(p.name)}</b>`}</td>
       <td><div style="display:flex;gap:10px;align-items:center"><div class="progress" style="flex:1"><span style="width:${p.verified_share * 100}%"></span></div><span class="muted">${pct(p.verified_share)}</span></div></td>
@@ -415,12 +474,17 @@ async function report() {
     btn.textContent = "Packaging ZIP dossier..."; btn.disabled = true;
     try {
       const res = await call("GET", "/api/dossier", {year: S.year});
-      download(`cbam_verifier_dossier_${S.year}.zip`, res.data, "application/zip");
+      if (res.status === 200 && res.data && (res.data instanceof Uint8Array || typeof res.data === "string" || res.data instanceof Blob)) {
+        download(`cbam_verifier_dossier_${S.year}.zip`, res.data, "application/zip");
+      } else {
+        const err = (res.data && res.data.error) ? res.data.error : `Server status ${res.status}`;
+        alert(`Could not download verifier dossier: ${err}\n\nNote: If python3 server.py was running before this update, please restart the server process in your terminal to load the /api/dossier endpoint.`);
+      }
     } catch (e) {
-      const x = await call("GET", "/api/report", {year: S.year});
-      download(`cbam_verifier_dossier_${S.year}.json`, JSON.stringify(x.data, null, 2), "application/json");
+      alert("Error generating dossier: " + e.message);
+    } finally {
+      btn.textContent = orig; btn.disabled = false;
     }
-    btn.textContent = orig; btn.disabled = false;
   };
 }
 

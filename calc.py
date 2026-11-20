@@ -47,6 +47,11 @@ def fuel_tco2(fuel, qty, unit):
     return tonnes * per_t
 
 
+# Typical metallurgical yields for finished fastener goods (Annex V physical mass balance).
+# Bolts: ~88% yield (12% scrap), Nuts: ~82% yield (18% scrap), Washers: ~90% yield (10% scrap).
+YIELD_BENCHMARKS = {"731815": 0.88, "731816": 0.82, "731822": 0.90}
+
+
 def product_default(output_lines):
     """EU default per tonne of goods, weighted by output. Matches the longest known CN prefix."""
     tot = sum(o["tonnes"] for o in output_lines)
@@ -103,9 +108,45 @@ def compute(plant, suppliers, year=2027, price=EUA_PRICE):
                       "default": goods_default * (1 + markup(y)) * PAYABLE[y] * price * 1000})  # EUR for 1,000 t
 
     steel_t = sum(p["tonnes"] for p in precursors)
+    yield_ratio = round(output / steel_t, 4) if steel_t > 0 else 1.0
+    specific_consumption = round(steel_t / output, 4) if output > 0 else 1.0
+    scrap_t = round(max(0.0, steel_t - output), 2)
+    scrap_rate = round(scrap_t / steel_t, 4) if steel_t > 0 else 0.0
+
+    # Sub-installation route modeling (Annex V Activity-Based Allocation)
+    # Heat-treated products carry the continuous furnace emissions; cold-formed products bypass thermal furnaces.
+    ht_lines = [o for o in plant["output"] if o.get("route") != "cold_formed"]
+    cf_lines = [o for o in plant["output"] if o.get("route") == "cold_formed"]
+    ht_output = sum(o["tonnes"] for o in ht_lines)
+    cf_output = sum(o["tonnes"] for o in cf_lines)
+    has_routing = cf_output > 0
+
+    routes = {}
+    if has_routing:
+        see_dir_ht = (direct / ht_output) if ht_output > 0 else 0.0
+        routes["heat_treated"] = {"output_t": ht_output, "see_direct": round(see_dir_ht, 4)}
+        routes["cold_formed"] = {"output_t": cf_output, "see_direct": 0.0}
+
+    # Primary CN benchmark
+    first_cn = "".join(ch for ch in str(plant["output"][0].get("cn") or "") if ch.isdigit())[:6] or BOLTS
+    bench = YIELD_BENCHMARKS.get(first_cn, 0.88)
+
+    mass_balance = {
+        "valid": steel_t >= (output * 0.95),  # allow 5% tolerance for opening inventory
+        "steel_input_t": steel_t,
+        "finished_output_t": output,
+        "yield_ratio": yield_ratio,
+        "benchmark_yield": bench,
+        "scrap_t": scrap_t,
+        "scrap_rate": scrap_rate,
+        "specific_consumption": specific_consumption,
+        "status": "healthy" if (0.70 <= yield_ratio <= 1.05) else ("under_input" if yield_ratio > 1.05 else "high_scrap")
+    }
+
     return {"id": plant["id"], "name": plant["name"], "empty": False, "year": year,
             "output_t": output, "direct_tco2": direct, "direct_lines": direct_lines,
             "precursors": precursors, "see_direct": direct / output,
             "see_precursor": precursor_total(year) / output, "see_total": see_total(year),
             "verified_share": sum(p["tonnes"] for p in precursors if p["basis"] == "actual") / steel_t if steel_t else 0,
-            "product_default": goods_default, "curve": curve}
+            "product_default": goods_default, "curve": curve,
+            "mass_balance": mass_balance, "routes": routes}

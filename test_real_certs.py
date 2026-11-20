@@ -151,19 +151,20 @@ def run_live_gemini_if_configured():
         if available:
             print(f"       Discovered {len(available)} model(s) enabled for this key: {', '.join(available[:4])}...")
     targets = [
-        os.path.join(HERE, "samples/mtc_real.pdf"),
-        os.path.join(ROOT, "ilide.info-fastners-mtc-pr_440008252c5a37ecf87173c7279e48d0.pdf"),
-        os.path.join(ROOT, "23 039 0 - 20460.signed.pdf")
+        ("application/pdf", os.path.join(HERE, "samples/mtc_real.pdf")),
+        ("image/jpeg", os.path.join(HERE, "samples/sample_mtc_photo.jpg")),
+        ("application/pdf", os.path.join(ROOT, "ilide.info-fastners-mtc-pr_440008252c5a37ecf87173c7279e48d0.pdf")),
+        ("application/pdf", os.path.join(ROOT, "23 039 0 - 20460.signed.pdf"))
     ]
-    for path in targets:
+    for mime_type, path in targets:
         if not os.path.isfile(path):
             continue
         name = os.path.basename(path)
-        print(f" -> Testing {name} ({os.path.getsize(path)/1024:.1f} KB)...")
+        print(f" -> Testing {name} ({os.path.getsize(path)/1024:.1f} KB, {mime_type})...")
         try:
             raw = open(path, "rb").read()
-            res, mode_used = extract.extract("application/pdf", raw)
-            print(f"    Extracted: doc_type={res['doc_type']}, supplier={res['supplier']}, steel_tonnes={res.get('steel_tonnes')}, heats={res.get('heats')}")
+            res, mode_used = extract.extract(mime_type, raw)
+            print(f"    Extracted: doc_type={res['doc_type']}, supplier={res.get('supplier')}, steel_tonnes={res.get('steel_tonnes')}, heats={res.get('heats')}")
             assert res["doc_type"] in ("mtc", "steel_invoice", "production", "other"), res["doc_type"]
         except Exception as e:
             print(f"    [error] {e}")

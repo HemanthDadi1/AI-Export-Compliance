@@ -117,6 +117,53 @@ def test_agent_review_endpoint():
     assert "RSR-24-0412" in data["draft_email"]["email"]
 
 
+def test_dossier_zip_export():
+    import zipfile, io
+    call("POST", "/api/reset")
+    call("POST", "/api/demo")
+    code, payload, ctype, hdrs = call("GET", "/api/dossier", {"year": "2027"})
+    assert code == 200, f"Expected 200, got {code}"
+    assert ctype == "application/zip", f"Expected application/zip, got {ctype}"
+    assert isinstance(payload, bytes), "Payload must be binary bytes"
+    assert len(payload) > 1000, "ZIP dossier is unexpectedly small"
+    zf = zipfile.ZipFile(io.BytesIO(payload))
+    assert zf.testzip() is None, "ZIP file integrity check failed"
+    names = zf.namelist()
+    assert "cbam_audit_trail.json" in names
+    assert "cbam_supplier_communication.csv" in names
+    assert "monitoring_methodology.txt" in names
+    assert any(n.startswith("evidence_documents/") for n in names)
+
+
+def test_carbon_ledger_and_trader_detection():
+    call("POST", "/api/reset")
+    # Upload an MTC with a trader name to test origin detection
+    doc = call("POST", "/api/upload", {}, {
+        "filename": "trader_cert.txt",
+        "mime": "text/plain",
+        "data": base64.b64encode(b"Document: mtc\nSupplier: Aggarwal Steel Traders\nHeat No: AGG-991\nSteel (t): 45\n").decode()
+    })[1]
+    issues = [d["issues"] for d in call("GET", "/api/docs")[1] if d["name"] == "trader_cert.txt"][0]
+    assert any("distributor/trader" in iss for iss in issues)
+
+    # Load demo and verify carbon ledger
+    call("POST", "/api/reset")
+    call("POST", "/api/demo")
+    state = call("GET", "/api/state", {"year": "2027"})[1]
+    ledger = state.get("carbon_ledger", [])
+    assert len(ledger) > 0
+    item = next((x for x in ledger if "RSR" in x["heat_no"]), None)
+    assert item is not None
+    assert item["purchased_t"] > 0
+    assert item["status"] in ("active", "depleted", "fully_allocated")
+
+    # Readiness score
+    call("POST", "/api/review_all")
+    ready = call("GET", "/api/readiness")[1]
+    assert ready["score"] == 100
+    assert ready["verifier_ready"] is True
+
+
 def test_static_files_stay_inside_docs():
     assert server.static_path("/") .endswith(os.path.join("docs", "index.html"))
     assert server.static_path("/app.html").endswith(os.path.join("docs", "app.html"))

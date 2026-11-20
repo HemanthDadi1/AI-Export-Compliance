@@ -61,6 +61,37 @@ def test_verified_mill_widens_the_gap_to_the_default():
     assert all(y["default"] - y["yours"] > x["default"] - x["yours"] for x, y in zip(a, b))
 
 
+def test_mass_balance_and_yield():
+    # 110 t wire rod in -> 100 t bolts out (90.9% yield, 9.1% scrap loss)
+    p = plant([{"supplier": "X", "tonnes": 110}])
+    p["output"] = [{"tonnes": 100, "cn": "7318 15"}]
+    r = compute(p, {}, 2027)
+    mb = r["mass_balance"]
+    assert mb["valid"] is True
+    assert mb["steel_input_t"] == 110
+    assert mb["finished_output_t"] == 100
+    assert abs(mb["yield_ratio"] - 0.9091) < 1e-4
+    assert mb["scrap_t"] == 10.0
+    assert abs(mb["scrap_rate"] - (10.0 / 110.0)) < 1e-4
+    assert mb["status"] == "healthy"
+
+
+def test_sub_installation_route_allocation():
+    # 100 t total output: 60 t heat-treated bolts (CN 7318 15), 40 t cold-formed washers (CN 7318 22)
+    # Total fuel = 298.5 tCO2
+    p = {"id": "P", "name": "P", "steel": [{"supplier": "X", "tonnes": 100}],
+         "fuel": [{"fuel": "lpg", "qty": 100, "unit": "t"}],  # 298.5 tCO2
+         "output": [{"tonnes": 60, "cn": "7318 15", "route": "heat_treated"},
+                    {"tonnes": 40, "cn": "7318 22", "route": "cold_formed"}]}
+    r = compute(p, {}, 2027)
+    routes = r["routes"]
+    assert "heat_treated" in routes and "cold_formed" in routes
+    # Cold-formed washers carry 0.0 direct furnace emissions
+    assert routes["cold_formed"]["see_direct"] == 0.0
+    # Heat-treated bolts carry all 298.5 tCO2 over 60 t = 4.975 tCO2/t
+    assert abs(routes["heat_treated"]["see_direct"] - (298.5 / 60)) < 1e-4
+
+
 def test_empty():
     assert compute({"id": "P", "name": "P", "steel": [], "fuel": [], "output": []}, {})["empty"]
 

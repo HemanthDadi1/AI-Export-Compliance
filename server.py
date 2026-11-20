@@ -6,7 +6,7 @@ try:
     from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 except ImportError:  # the browser build has no sockets; only dispatch() is used there
     ThreadingHTTPServer, BaseHTTPRequestHandler = None, object
-from calc import compute, fuel_tco2, FUELS, DEFAULT_PRECURSOR_SEE
+from calc import compute, fuel_tco2, FUELS, DEFAULT_PRECURSOR_SEE, precursor_see
 from extract import extract, mode
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -144,6 +144,9 @@ def review(doc_id, patch):
     rebuild()
 
 
+TRADER_KEYWORDS = ("trader", "trading", "stockist", "distributor", "impex", "enterprises", "agencies")
+
+
 def issues(d):
     out = [d["error"]] if d["error"] else []
     r = d["record"]
@@ -154,6 +157,10 @@ def issues(d):
                  and "tonnes" not in heats.get(re.sub(r"[^A-Z0-9]", "", h["heat_no"].upper()), {})]
         if loose:
             out.append(f"No tonnes for heat {', '.join(loose)}. Type them here, or upload the invoice for it.")
+        if r["doc_type"] == "mtc" and r.get("supplier"):
+            sup_low = str(r["supplier"]).lower()
+            if any(term in sup_low for term in TRADER_KEYWORDS):
+                out.append(f"Warning: '{r['supplier']}' appears to be a distributor/trader. EU CBAM Art. 3(15) requires the primary melting installation name (e.g. Tata, Jindal, SAIL, RINL).")
     return out
 
 
@@ -182,6 +189,49 @@ def sync_steel(p):
 def unmatched(p):
     return [{"heat": e["heat"], "missing": "tonnes" if "mill" in e else "mill"}
             for e in p["heats"].values() if not ("mill" in e and "tonnes" in e)]
+
+
+def carbon_ledger(p):
+    """Tracks every steel heat's purchased vs allocated tonnes, remaining balance, and overdraft prevention."""
+    ledger = []
+    allocations = {}
+    for s in p.get("steel", []):
+        allocations[s["heat"]] = allocations.get(s["heat"], 0.0) + s["tonnes"]
+
+    for k, e in sorted(p.get("heats", {}).items(), key=lambda x: str(x[1].get("heat"))):
+        heat_no = e.get("heat") or k
+        mill = e.get("mill")
+        purchased = round(float(e.get("tonnes") or 0.0), 3)
+        allocated = round(float(allocations.get(heat_no, 0.0)), 3)
+        remaining = round(max(0.0, purchased - allocated), 3)
+        overdraft = round(max(0.0, allocated - purchased), 3)
+
+        sup = state["suppliers"].get(mill, {}) if mill else {}
+        actual = bool(sup and sup.get("verified"))
+        see = sup.get("see") if actual else precursor_see(e.get("cn"))
+
+        if overdraft > 0:
+            status = "overdraft"
+        elif remaining == 0 and purchased > 0:
+            status = "fully_allocated"
+        elif remaining > 0:
+            status = "active"
+        else:
+            status = "unallocated"
+
+        ledger.append({
+            "heat_no": heat_no,
+            "mill": mill or "Unknown Mill",
+            "cn": e.get("cn") or "7213",
+            "purchased_t": purchased,
+            "allocated_t": allocated,
+            "remaining_t": remaining,
+            "overdraft_t": overdraft,
+            "basis": "actual" if actual else "default",
+            "see": see,
+            "status": status
+        })
+    return ledger
 
 
 def add_log(p, e):
@@ -327,6 +377,9 @@ def audit(year):
             "review": {"documents": len(docs), "confirmed": sum(d["reviewed"] for d in docs.values()),
                        "edited": sum(bool(d["edits"]) for d in docs.values()), "edits": edits}, "plan": plan(p), "method": plan(p)["lines"],
             "checks": p["checks"] + log_checks(p),
+            "mass_balance": r.get("mass_balance"),
+            "routes": r.get("routes"),
+            "carbon_ledger": carbon_ledger(p),
             "default_note": f"Steel default used: {DEFAULT_PRECURSOR_SEE} tCO2/t before the mark-up, India wire rod (CN 7213), Implementing Regulation (EU) 2025/2621 as corrected by 2026/1740.",
             "draft": "Draft. Not verified. Indirect emissions are not counted for iron and steel goods."}
 
@@ -357,7 +410,10 @@ def readiness(p):
          "hint": "Recommended. A verifier asks for fuel used, not fuel bought."},
     ]
     req = [i for i in items if i["required"]]
-    return {"items": items, "ready": all(i["done"] for i in req), "done": sum(i["done"] for i in req), "total": len(req)}
+    done_count = sum(i["done"] for i in req)
+    score = int(round((done_count / len(req)) * 100)) if req else 0
+    return {"items": items, "ready": all(i["done"] for i in req), "done": done_count, "total": len(req),
+            "score": score, "verifier_ready": all(i["done"] for i in req)}
 
 
 def static_path(path):
@@ -470,6 +526,28 @@ def agent_review(year=2027):
         })
         rank += 1
 
+    mb = v.get("mass_balance")
+    if mb and not mb.get("valid"):
+        fixes.append({
+            "rank": rank,
+            "category": "mass_balance",
+            "title": "Physical mass balance discrepancy",
+            "detail": f"Finished fastener output ({mb['finished_output_t']} t) exceeds steel precursor input ({mb['steel_input_t']} t). Under Annex V, an audit will be rejected without positive raw material scrap balance.",
+            "action": "Upload missing steel purchase invoices or MTCs to cover the output volume."
+        })
+        rank += 1
+
+    overdrafts = [item for item in v.get("carbon_ledger", []) if item["status"] == "overdraft"]
+    if overdrafts:
+        fixes.append({
+            "rank": rank,
+            "category": "carbon_overdraft",
+            "title": f"Carbon ledger overdraft on {len(overdrafts)} heat(s)",
+            "detail": f"Heats {', '.join(h['heat_no'] for h in overdrafts)} have been allocated more tonnage than verified on the mill certificate. Excess steel is automatically reverted to EU default values.",
+            "action": "Verify shipment weights against MTC coil quantities."
+        })
+        rank += 1
+
     if doc_conflicts:
         fixes.append({
             "rank": rank,
@@ -514,8 +592,21 @@ def view(year):
         except ValueError as e:
             plants.append({"id": p["id"], "name": p["name"], "empty": True, "error": str(e)})
     you = state["plants"][YOU]
+    c_ledger = carbon_ledger(you)
+    overdrafts = [f"Overdraft on Heat {item['heat_no']}: allocated {item['allocated_t']} t exceeds certificate {item['purchased_t']} t. Overdraft cannot claim verified basis."
+                  for item in c_ledger if item["status"] == "overdraft"]
+    p_info = plants[0] if plants and not plants[0].get("empty") else {}
+    mb = p_info.get("mass_balance")
+    mb_checks = []
+    if mb and not mb.get("valid"):
+        mb_checks.append(f"Mass balance breach: Finished fastener output ({mb['finished_output_t']} t) exceeds steel input ({mb['steel_input_t']} t). Annex V requires physical scrap balance.")
+
+    all_checks = you["checks"] + log_checks(you) + overdrafts + mb_checks
     return {"plants": plants, "suppliers": state["suppliers"], "year": year,
-            "unmatched": unmatched(you), "checks": you["checks"] + log_checks(you),
+            "unmatched": unmatched(you), "checks": all_checks,
+            "carbon_ledger": c_ledger,
+            "mass_balance": mb,
+            "routes": p_info.get("routes"),
             "log": you["log"], "plan": plan(you),
             "mode": mode()}
 
@@ -599,6 +690,7 @@ class H(BaseHTTPRequestHandler):
         data = body if isinstance(body, bytes) else body.encode() if isinstance(body, str) else json.dumps(body).encode()
         self.send_response(code)
         self.send_header("Content-Type", ctype)
+        self.send_header("Content-Length", str(len(data)))
         self.send_header("X-Content-Type-Options", "nosniff")
         for k, v in extra:
             self.send_header(k, v)
@@ -607,12 +699,14 @@ class H(BaseHTTPRequestHandler):
 
     def route(self, method, body):
         u = urlparse(self.path)
+        path = u.path[5:] if u.path.startswith("/docs/api/") else u.path
         q = {k: v[0] for k, v in parse_qs(u.query).items()}
-        self.send(*dispatch(method, u.path, q, body))
+        self.send(*dispatch(method, path, q, body))
 
     def do_GET(self):
         u = urlparse(self.path)
-        if u.path.startswith("/api/"):
+        path = u.path[5:] if u.path.startswith("/docs/api/") else u.path
+        if path.startswith("/api/"):
             return self.route("GET", None)
         f = static_path(u.path)
         if not f:
@@ -663,7 +757,13 @@ def export_csv(year):
 def export_dossier(year):
     import io, zipfile
     buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+    comp = zipfile.ZIP_DEFLATED
+    try:
+        import zlib
+    except ImportError:
+        comp = zipfile.ZIP_STORED
+
+    with zipfile.ZipFile(buf, "w", comp) as z:
         rep = audit(year)
         ag = agent_review(year)
         you = state["plants"][YOU]
@@ -673,6 +773,9 @@ def export_dossier(year):
             "installation": you["name"],
             "reporting_year": year,
             "report_summary": rep.get("summary"),
+            "mass_balance": rep.get("mass_balance"),
+            "sub_installation_routes": rep.get("routes"),
+            "carbon_depletion_ledger": rep.get("carbon_ledger"),
             "audit_rows": rep.get("rows"),
             "plant_review": rep.get("review"),
             "open_checks": rep.get("checks"),
@@ -682,6 +785,7 @@ def export_dossier(year):
         z.writestr("cbam_audit_trail.json", json.dumps(dossier_data, indent=2))
         z.writestr("cbam_supplier_communication.csv", export_csv(year))
 
+        mb = rep.get("mass_balance") or {}
         meth = [
             "CBAM INSTALLATION MONITORING METHODOLOGY",
             f"Installation: {you['name']}",
@@ -695,7 +799,13 @@ def export_dossier(year):
             "  Non-Alloy Steel Wire Rod Default (CN 7213): 4.27 tCO2/t",
             "  Alloy Steel Wire Rod Default (CN 7227): 7.30 tCO2/t",
             "",
-            "2. Specific Rules & Boundaries Applied:"
+            "2. Metallurgical Mass Balance & Scrap Rules (Annex V):",
+            f"  Total Steel Precursor Consumed: {mb.get('steel_input_t', 0)} t",
+            f"  Total Finished Goods Output: {mb.get('finished_output_t', 0)} t",
+            f"  Plant Yield Ratio: {mb.get('yield_ratio', 1.0) * 100:.2f}% (Scrap Rate: {mb.get('scrap_rate', 0.0) * 100:.2f}%)",
+            f"  Specific Consumption: {mb.get('specific_consumption', 1.0):.3f} t steel / t finished fastener",
+            "",
+            "3. Specific Rules & Boundaries Applied:"
         ]
         meth += [f"  - {line}" for line in rep.get("method", [])]
         z.writestr("monitoring_methodology.txt", "\n".join(meth) + "\n")
@@ -703,7 +813,8 @@ def export_dossier(year):
         # Primary Evidence Documents
         for doc_id, d in docs.items():
             raw_bytes = d["raw"] if isinstance(d["raw"], bytes) else d["raw"].encode("utf-8", "replace")
-            z.writestr(f"evidence_documents/{d['name']}", raw_bytes)
+            safe_name = os.path.basename(str(d["name"]).replace("\\", "/")) or f"doc_{doc_id}"
+            z.writestr(f"evidence_documents/{safe_name}", raw_bytes)
 
     return buf.getvalue()
 

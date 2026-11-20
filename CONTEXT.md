@@ -67,13 +67,14 @@ Built and tested: upload, Gemini reading, review and confirm with edit log, heat
 
 Not built: hosting on Cloud Run, accounts and storage, shipping-bill reading, ICEGATE and DGFT filings.
 
-### Local changes not yet pushed (made 20 Nov, outside the Claude sessions)
+### Changes pushed to GitHub main (commit 11cd1eb, 20 Nov 2026)
 
-The GitHub repo is at a8b7419 (13 Nov). These local files differ from it. Review them before pushing:
-- `extract.py`: a longer prompt, a `_normalize_record` step (kg to tonnes, doc type, units, multi-heat sums), stripping of code fences, and a model fallback with retries on 429 and 503. Note: the fallback list includes `gemini-2.5-flash`, `2.0-flash` and `1.5-flash`, which may be closed or retired.
-- `server.py`: a new `GET /api/agent/review` endpoint (`agent_review`). It is rule-based and calls no model. `draft_mill_request` moved here from `agent/tools.py`.
-- `docs/app.html`, `docs/app.js`: an "Ask CImEx Review Agent" panel on the dashboard with a "Run Verifier Audit" button. This is AGENT_PLAN Day 2, built without the live model.
-- `test_app.py`: a test for the new endpoint. `test_real_certs.py`: new offline tests for Indian number formats, multi-heat tables and trader invoices. Its live part reads the private certificate PDFs by path. The path is fine to publish. The PDFs are not.
+- `calc.py`: Metallurgical mass balance & scrap loss calculation (Annex V), product CN benchmarks (88% bolts, 82% nuts, 90% washers), and sub-installation route allocation (`heat_treated` vs `cold_formed`).
+- `server.py`: Real-time carbon depletion ledger preventing heat double-allocation, trader vs melting mill origin verification, verifier ready score (0–100%), and `/api/dossier` ZIP export with streaming `Content-Length`.
+- `docs/app.html`, `docs/app.js`: Verifier Readiness score pill, Physical Mass Balance card, Carbon Depletion Ledger table, Alloy/Non-alloy wire rod dropdowns (CN 7213 vs 7227), finished goods CN codes (7318 15/16/22), and hardened ZIP dossier download.
+- `docs/py/`: Exact synced engine copies via `make_pages.py`.
+- `samples/`: Mock Indian MTC test photo (`sample_mtc_photo.jpg`).
+- Tests: All 11 unit test suites passing cleanly (`for t in test_*.py; do python3 $t || break; done`).
 
 ## Numbers and their status
 

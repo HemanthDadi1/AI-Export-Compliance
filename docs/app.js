@@ -114,11 +114,20 @@ function fieldsFor(dr) {
   if (t === "mtc" || t === "steel_invoice") {
     const heats = dr.rows.map((h, i) => `<label>Heat number<input data-row="${i}" data-k="heat_no" maxlength="60" value="${esc(h.heat_no)}"></label>
       <label>Steel tonnes<input type="number" inputmode="decimal" step="any" min="0" data-row="${i}" data-k="tonnes" value="${esc(h.tonnes)}"></label>`).join("");
-    return (t === "mtc" ? txt("supplier", "Steel mill that made it", dr.supplier, true) : "") + heats;
+    const steelCn = `<label class="wide">Steel type (CN)<select data-f="cn_code">
+      <option value="7213" ${String(dr.cn_code || "").includes("7227") ? "" : "selected"}>Non-alloy wire rod (CN 7213, 4.27 tCO2/t)</option>
+      <option value="7227" ${String(dr.cn_code || "").includes("7227") ? "selected" : ""}>Alloy steel wire rod (CN 7227, 7.30 tCO2/t)</option></select></label>`;
+    return (t === "mtc" ? txt("supplier", "Steel mill that made it", dr.supplier, true) : "") + steelCn + heats;
   }
   if (t === "fuel_invoice") return `<label>Fuel<select data-f="fuel"><option value="">Choose</option>${opts(FUELS, dr.fuel)}</select></label>${num("quantity", "Quantity", dr.quantity)}
     <label>Unit<select data-f="unit"><option value="">Choose</option>${opts({t: "t", kg: "kg", litre: "litre", m3: "m3"}, dr.unit)}</select></label>`;
-  if (t === "production") return num("output_tonnes", "Output (t)", dr.output_tonnes) + txt("cn_code", "CN code", dr.cn_code);
+  if (t === "production") {
+    const goodsCn = `<label class="wide">Finished goods (CN code)<select data-f="cn_code">
+      <option value="7318 15" ${String(dr.cn_code || "").includes("16") || String(dr.cn_code || "").includes("22") ? "" : "selected"}>Hex bolts and screws (CN 7318 15, default 5.72 tCO2/t)</option>
+      <option value="7318 16" ${String(dr.cn_code || "").includes("16") ? "selected" : ""}>Hex nuts (CN 7318 16, default 5.14 tCO2/t)</option>
+      <option value="7318 22" ${String(dr.cn_code || "").includes("22") ? "selected" : ""}>Washers (CN 7318 22, default 5.14 tCO2/t)</option></select></label>`;
+    return num("output_tonnes", "Output (t)", dr.output_tonnes) + goodsCn;
+  }
   return `<p class="muted wide" style="grid-column:1/-1">We could not tell what this is. Pick the right type above.</p>`;
 }
 
@@ -224,6 +233,61 @@ function costChart(curve) {
     ${curve.map((c, i) => `<circle class="f-acc" cx="${x(i)}" cy="${y(c.yours)}" r="3.5"><title>${c.year}: ${eur(c.yours)} with your data, ${eur(c.default)} on the EU default for your goods</title></circle>`).join("")}</svg>`;
 }
 
+function renderAgentAuditBody(ar) {
+  if (!$("agentAuditBody")) return;
+  if (!ar || ar.empty) {
+    $("agentAuditBody").innerHTML = `<p class="muted">No documents uploaded yet. Upload certificates and invoices to run a pre-audit.</p>`;
+    return;
+  }
+  const fixesHtml = ar.fixes && ar.fixes.length ? `
+    <div style="display:grid;gap:8px;margin:12px 0">
+      ${ar.fixes.map(fx => `
+        <div style="display:flex;gap:12px;align-items:flex-start;background:var(--bg);padding:10px 14px;border-radius:8px;border:1px solid var(--line)">
+          <span class="pill ${fx.rank === 1 ? "warn" : "info"}">#${fx.rank}</span>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13px;color:var(--ink)">${esc(fx.title)}</div>
+            <div style="font-size:13px;color:var(--mute);margin:2px 0 4px">${esc(fx.detail)}</div>
+            <div style="font-size:12px;color:var(--ink)"><b>Action:</b> ${esc(fx.action)}</div>
+          </div>
+        </div>
+      `).join("")}
+    </div>` : `<div style="margin:10px 0"><span class="pill ok">✓ All verifier checks passed</span></div>`;
+
+  const question = ar.question || (ar.questions && ar.questions[0]);
+  const questionHtml = question ? `
+    <div class="notice" style="margin:12px 0;background:var(--acc-soft);border:1px solid var(--acc)">
+      <b style="color:var(--acc)">Targeted question for clerk:</b>
+      <p style="margin:4px 0 0;font-size:13px;color:var(--ink)">${esc(question)}</p>
+    </div>` : "";
+
+  const draftHtml = ar.draft_email ? `
+    <div style="background:var(--bg);padding:12px 14px;border-radius:8px;border:1px solid var(--line);margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <b style="font-size:13px">Draft supplier request to ${esc(ar.draft_email.mill)}</b>
+        <button class="btn small accent" id="copyAgentEmail" type="button">Copy Supplier Request Email</button>
+      </div>
+      <div style="font-size:12px;color:var(--mute);margin-bottom:6px"><b>Subject:</b> ${esc(ar.draft_email.subject)}</div>
+      <pre style="white-space:pre-wrap;font-family:inherit;font-size:12px;line-height:1.5;margin:0;background:var(--surface);padding:10px;border-radius:6px;border:1px solid var(--line)">${esc(ar.draft_email.email)}</pre>
+    </div>` : "";
+
+  $("agentAuditBody").innerHTML = `
+    <p style="font-size:14px;color:var(--ink);margin:4px 0 8px"><b>Pre-Audit Finding:</b> ${esc(ar.summary)}</p>
+    ${fixesHtml}
+    ${questionHtml}
+    ${draftHtml}`;
+
+  if ($("copyAgentEmail")) {
+    $("copyAgentEmail").onclick = async e => {
+      try {
+        await navigator.clipboard.writeText(ar.draft_email.email);
+        e.target.textContent = "✓ Copied! Ready to paste into email";
+      } catch (x) {
+        e.target.textContent = "Could not copy";
+      }
+    };
+  }
+}
+
 async function dashboard() {
   const you = S.state.plants[0];
   $("dashEmpty").hidden = !you.empty; $("dash").hidden = !!you.empty;
@@ -235,24 +299,18 @@ async function dashboard() {
   const open = [...a.checks.map(c => ["bad", c]), ...a.plan.gaps.map(g => ["warn", g])];
   const todo = S.docs.filter(d => !d.reviewed).length;
   $("reviewBanner").innerHTML = todo ? `<div class="notice">${todo} of ${S.docs.length} documents are not confirmed yet, so these numbers are a draft. <a href="#/documents">Check and confirm them</a>.</div>` : "";
+
+  const executeAudit = async (btn) => {
+    if (btn) { btn.textContent = "Auditing..."; btn.disabled = true; }
+    const ar = (await call("GET", "/api/agent/review", {year: S.year})).data;
+    if (btn) { btn.textContent = "Run Verifier Audit"; btn.disabled = false; }
+    renderAgentAuditBody(ar);
+  };
+  if ($("runAgentAudit")) $("runAgentAudit").onclick = e => executeAudit(e.target);
+  await executeAudit();
+
   const mills = you.precursors.filter(p => p.basis === "default").sort((x, y) => y.tonnes - x.tonnes), all_t = you.precursors.reduce((t, p) => t + p.tonnes, 0);
-  if (mills.length) {
-    const m = mills[0], heats = m.heats.map(h => h.heat).join(", ");
-    $("attention").innerHTML = `<div class="attention"><span class="icon" aria-hidden="true">!</span><div><b>Attention: ${esc(m.supplier)} is your biggest gap</b>
-      <p>It supplied ${f(m.tonnes, 0)} t (${pct(m.tonnes / all_t)} of your steel) and has no verified data, so that steel is on the EU default plus a penalty. Asking this mill for its verified value is the single biggest change you can make.</p>
-      <div class="row"><button class="btn small accent" id="copyAsk" type="button">Copy a request to the mill</button><a class="btn small" href="#/mills">Open Mills</a></div></div></div>`;
-    $("copyAsk").onclick = async e => {
-      const text = `Subject: Verified emissions data for steel you supplied to ${you.name.replace(" (your plant)", "")}
-
-Hello,
-
-Our EU buyers need verified embedded-emissions data for the steel we buy from you (heats ${heats}). Please share your verified value in tCO2 per tonne of steel and the verification report reference. With it we report your actual value instead of the EU default, which lowers the cost for us and for every other customer of yours.
-
-Thank you,
-${you.name.replace(" (your plant)", "")}`;
-      try { await navigator.clipboard.writeText(text); e.target.textContent = "Copied. Paste it into an email"; } catch (x) { e.target.textContent = "Could not copy"; }
-    };
-  } else $("attention").innerHTML = `<div class="attention calm"><span class="icon" aria-hidden="true">✓</span><div><b>All your steel is on verified mill data</b><p>Nothing to chase. Close the open checks below and create the report.</p></div></div>`;
+  $("attention").innerHTML = "";
   $("kpis").innerHTML =
     kpi("Embedded emissions", f(you.see_total), "tCO2/t", `<span class="pill ${you.verified_share < 1 ? "warn" : "ok"}">${pct(1 - you.verified_share)}</span> of steel on defaults`) +
     kpi("Steel on verified mill data", pct(you.verified_share), "", `<span class="pill info">${steel.length - steel.filter(r => r.basis.startsWith("default")).length} of ${steel.length}</span> heats on actual values`) +
@@ -330,7 +388,8 @@ async function report() {
   const basis = b => { if (!b) return ""; const [k, ...rest] = b.split(" "); return `<span class="pill ${k === "default" ? "bad" : "ok"}">${esc(k)}</span><div class="muted">${esc(rest.join(" "))}</div>`; };
   $("reportOut").innerHTML = `<div class="controls no-print" style="margin-bottom:16px">
       <button class="btn primary" type="button" onclick="window.print()">Print or save as PDF</button>
-      <button class="btn" type="button" id="csv">Download EU supplier template (CSV)</button></div>
+      <button class="btn" type="button" id="csv">Download EU supplier template (CSV)</button>
+      <button class="btn" type="button" id="verifierPack">Download Verifier Dossier (ZIP)</button></div>
     <article class="card report">
       <span class="pill warn">Draft for verifier review</span>
       <h1>Carbon compliance report</h1>
@@ -350,6 +409,19 @@ async function report() {
       <div class="sign"><div>Prepared by (plant)</div><div>Verified by (accredited verifier) and date</div></div>
     </article>`;
   $("csv").onclick = async () => { const x = await call("GET", "/api/export", {year: S.year}); download(`cbam_report_${S.year}.csv`, x.data, "text/csv"); };
+  $("verifierPack").onclick = async () => {
+    const btn = $("verifierPack");
+    const orig = btn.textContent;
+    btn.textContent = "Packaging ZIP dossier..."; btn.disabled = true;
+    try {
+      const res = await call("GET", "/api/dossier", {year: S.year});
+      download(`cbam_verifier_dossier_${S.year}.zip`, res.data, "application/zip");
+    } catch (e) {
+      const x = await call("GET", "/api/report", {year: S.year});
+      download(`cbam_verifier_dossier_${S.year}.json`, JSON.stringify(x.data, null, 2), "application/json");
+    }
+    btn.textContent = orig; btn.disabled = false;
+  };
 }
 
 // ---------- product menu ----------

@@ -13,6 +13,13 @@ def test_fuel():
 
 def test_steel_default_is_the_official_india_value():
     assert DEFAULT_PRECURSOR_SEE == 4.27  # Reg (EU) 2025/2621 Annex I, India, CN 7213, as corrected by 2026/1740
+    assert PRECURSOR_DEFAULTS["7227"] == 7.30  # Reg (EU) 2025/2621 Annex I, India, CN 7227 (Alloy wire rod)
+
+
+def test_alloy_wire_rod_default():
+    r = compute(plant([{"supplier": "AlloyMill", "tonnes": 100, "cn": "7227"}]), {}, 2027)
+    assert abs(r["see_precursor"] - 7.30 * 1.2) < 1e-9
+    assert r["precursors"][0]["cn"] == "7227"
 
 
 def test_default_has_markup():

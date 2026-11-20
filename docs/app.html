@@ -63,6 +63,20 @@
       <div id="dashEmpty" class="card empty" hidden><b>No numbers yet</b><p>Upload the plant's documents, or load the samples, to see the analytics.</p><a class="btn primary" href="#/documents">Go to documents</a></div>
       <div id="dash">
         <div id="reviewBanner"></div>
+        <!-- Ask CImEx Review Agent -->
+        <section class="card" id="agentCard" style="margin-bottom:16px;border:1px solid var(--acc)">
+          <div class="card-head" style="margin-bottom:10px">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <h2>Ask CImEx Review Agent</h2>
+                <span class="pill info">Verifier Pre-Audit</span>
+              </div>
+              <p class="sub">Simulates an EU-accredited verifier audit. Cites rules and drafts supplier requests without changing figures.</p>
+            </div>
+            <button class="btn primary small" id="runAgentAudit" type="button">Run Verifier Audit</button>
+          </div>
+          <div id="agentAuditBody"></div>
+        </section>
         <div id="attention"></div>
         <div class="kpis" id="kpis"></div>
         <div class="grid2">

@@ -53,7 +53,7 @@ def apply_record(p, doc_id, d):
         if not any(h.get("heat_no") or (mill and pos(h.get("tonnes"))) for h in rows):
             return "not used: no heat number"
         for i, h in enumerate(rows):
-            add_heat(p, h.get("heat_no") or f"{doc_id}-{i}", mill, h.get("tonnes") if pos(h.get("tonnes")) else None, src)
+            add_heat(p, h.get("heat_no") or f"{doc_id}-{i}", mill, h.get("tonnes") if pos(h.get("tonnes")) else None, src, cn=h.get("cn") or rec.get("cn_code"))
     elif t == "fuel_invoice" and rec.get("fuel") in FUEL_NAMES and pos(rec.get("quantity")) and rec.get("unit") in UNIT_NAMES:
         p["fuel"].append({"fuel": rec["fuel"], "qty": rec["quantity"], "unit": rec["unit"], "source": src})
     elif t == "production" and pos(rec.get("output_tonnes")):
@@ -157,9 +157,11 @@ def issues(d):
     return out
 
 
-def add_heat(p, key, mill, tonnes, src):
+def add_heat(p, key, mill, tonnes, src, cn=None):
     """One entry per heat. Mill comes from a certificate, tonnes from any document. Conflicts are flagged, never overwritten."""
     e = p["heats"].setdefault(re.sub(r"[^A-Z0-9]", "", key.upper()) or key, {"heat": key})  # "BR-148" == "br 148"
+    if cn and "cn" not in e:
+        e["cn"] = str(cn).strip()
     for field, val in (("mill", mill), ("tonnes", tonnes)):
         if val is None:
             continue
@@ -172,7 +174,7 @@ def add_heat(p, key, mill, tonnes, src):
 
 def sync_steel(p):
     p["steel"] = [{"supplier": e["mill"], "tonnes": e["tonnes"], "heat": e["heat"], "source": e["tonnes_src"],
-                   "mill_source": e["mill_src"]} for e in p["heats"].values() if "mill" in e and "tonnes" in e]
+                   "mill_source": e["mill_src"], "cn": e.get("cn")} for e in p["heats"].values() if "mill" in e and "tonnes" in e]
     for s in p["steel"]:
         state["suppliers"].setdefault(s["supplier"], {"verified": False})
 
@@ -367,6 +369,143 @@ def static_path(path):
     return full if full.startswith(os.path.realpath(DOCS) + os.sep) and os.path.isfile(full) else None
 
 
+def draft_mill_request(mill, year=2027):
+    p = view(year)["plants"][0]
+    m = next((x for x in p.get("precursors", []) if x["supplier"] == mill), None)
+    if m is None:
+        return {"error": f"{mill} does not supply this plant."}
+    if m.get("basis") == "actual":
+        return {"error": f"{mill} has already shared verified data."}
+    heats = "\n".join(f"  - Heat {h['heat']}: {h['tonnes']:g} t" for h in m.get("heats", []))
+    email = (f"Dear {mill} team,\n\n"
+             f"Our EU buyers now need the embedded emissions of the steel in our goods under the EU carbon border "
+             f"adjustment mechanism (CBAM). In the period we report, we used {m['tonnes']:g} t of your wire rod:\n{heats}\n\n"
+             "Without your data, our buyers must use the EU default value plus a penalty mark-up.\n\n"
+             "Could you share the embedded emissions of this steel, in tCO2 per tonne, with the verification "
+             "report from an accredited verifier? A value for your plant and product route is enough.\n\n"
+             "Every customer of yours that uses our system will be able to reuse it.\n\n"
+             f"Regards,\n{p['name'].replace(' (your plant)', '')}")
+    return {"mill": mill, "subject": f"Request for verified CBAM emissions data: {m['tonnes']:g} t of wire rod",
+            "email": email}
+
+
+def agent_review(year=2027):
+    you = state["plants"][YOU]
+    v = view(year)
+    p_info = v["plants"][0]
+    if p_info.get("empty"):
+        return {
+            "empty": True,
+            "status": "No documents uploaded yet",
+            "tco2_per_tonne": 0.0,
+            "product_default": 5.72,
+            "summary": "No plant documents have been uploaded yet. Upload mill test certificates, fuel invoices, and production records to begin the verifier audit.",
+            "fixes": [],
+            "questions": ["Please upload the plant's mill test certificates, fuel invoices, and annual production records."],
+            "draft_email": None,
+            "ready": False
+        }
+
+    total = p_info["see_total"]
+    prod_dft = p_info["product_default"]
+    open_gaps = v["plan"]["gaps"]
+    doc_conflicts = v["checks"]
+    unconfirmed = [d["name"] for d in docs.values() if not d.get("reviewed")]
+    all_steel = sum(m["tonnes"] for m in p_info["precursors"]) or 1.0
+
+    summary = (f"Plant emissions are currently {total:.2f} tCO2/t (EU goods default is {prod_dft:.2f} tCO2/t). "
+               f"{(1 - p_info['verified_share'])*100:.0f}% of steel is on penalty default values.")
+
+    fixes = []
+    default_mills = [m for m in p_info["precursors"] if m["basis"] == "default"]
+    default_mills.sort(key=lambda x: -x["tonnes"])
+    top_mill_draft = None
+
+    if default_mills:
+        top_m = default_mills[0]
+        share = (top_m["tonnes"] / all_steel) * 100
+        fixes.append({
+            "rank": 1,
+            "category": "mill_data",
+            "title": f"Chasing verified data from {top_m['supplier']}",
+            "detail": f"{top_m['supplier']} supplies {top_m['tonnes']:g} t ({share:.0f}% of your steel) with no verified emissions data, triggering the EU default penalty. Moving this mill to actual data is your single biggest cost reduction.",
+            "action": f"Send the pre-drafted data request email below to {top_m['supplier']}."
+        })
+        top_mill_draft = draft_mill_request(top_m["supplier"], year)
+
+    rank = len(fixes) + 1
+    fuel_gaps = [g for g in open_gaps if "purchase invoices" in g.lower()]
+    if fuel_gaps:
+        fuels = []
+        if any("lpg" in g.lower() for g in fuel_gaps): fuels.append("LPG")
+        if any("diesel" in g.lower() for g in fuel_gaps): fuels.append("diesel")
+        fuel_names = " and ".join(fuels) if fuels else "fuel"
+        fixes.append({
+            "rank": rank,
+            "category": "fuel_log",
+            "title": f"Missing monthly stock logs for {fuel_names}",
+            "detail": "Fuel purchase invoices show what was bought, but CBAM verifiers require physical consumption (opening stock + bought − closing stock).",
+            "action": "Add monthly fuel tank/meter stock logs in the Monthly Log tab."
+        })
+        rank += 1
+
+    prod_gaps = [g for g in open_gaps if "production log" in g.lower()]
+    if prod_gaps:
+        fixes.append({
+            "rank": rank,
+            "category": "production_log",
+            "title": "Missing monthly production logs",
+            "detail": "An annual dispatch summary was provided, but CBAM verifiers require monthly gross production tonnes.",
+            "action": "Log monthly finished goods output in the Monthly Log tab."
+        })
+        rank += 1
+
+    if unconfirmed:
+        fixes.append({
+            "rank": rank,
+            "category": "unconfirmed_docs",
+            "title": f"{len(unconfirmed)} document(s) pending clerk confirmation",
+            "detail": f"Files like {', '.join(unconfirmed[:2])} have not been confirmed by a person. Verifiers require human sign-off on OCR values.",
+            "action": "Confirm or edit all extracted fields in the Documents tab."
+        })
+        rank += 1
+
+    if doc_conflicts:
+        fixes.append({
+            "rank": rank,
+            "category": "document_conflict",
+            "title": "Document conflicts detected",
+            "detail": "; ".join(doc_conflicts),
+            "action": "Resolve mismatched heat numbers or weights between mill certs and invoices."
+        })
+
+    question = None
+    if fuel_gaps:
+        question = "Do you maintain monthly fuel stock logs or only purchase invoices?"
+    elif prod_gaps:
+        question = "Do you keep monthly physical production logs for finished goods (nuts/bolts) or only annual dispatch records?"
+    elif unconfirmed:
+        question = "Have you verified the highlighted OCR values against the original paper certificates?"
+
+    questions = [question] if question else []
+
+    return {
+        "empty": False,
+        "plant": p_info["name"],
+        "year": year,
+        "tco2_per_tonne": total,
+        "product_default": prod_dft,
+        "verified_share": p_info["verified_share"],
+        "summary": summary,
+        "fixes": fixes,
+        "question": question,
+        "questions": questions,
+        "draft_email": top_mill_draft,
+        "tools_used": ["get_readiness", "get_documents", "get_plant", "draft_mill_request"],
+        "ready": readiness(you)["ready"]
+    }
+
+
 def view(year):
     plants = []
     for p in state["plants"].values():
@@ -390,6 +529,8 @@ def dispatch(method, path, query, body):
         if method == "GET":
             if path == "/api/state":
                 return js(200, view(year))
+            if path == "/api/agent/review":
+                return js(200, agent_review(year))
             if path == "/api/audit":
                 return js(200, audit(year))
             if path == "/api/readiness":
@@ -402,6 +543,9 @@ def dispatch(method, path, query, body):
             if path == "/api/export":
                 return 200, export_csv(year), "text/csv; charset=utf-8", [
                     ("Content-Disposition", "attachment; filename=cbam_supplier_communication.csv")]
+            if path == "/api/dossier":
+                return 200, export_dossier(year), "application/zip", [
+                    ("Content-Disposition", f"attachment; filename=cbam_verifier_dossier_{year}.zip")]
             if path == "/api/docs":
                 return js(200, [{"id": i, "name": d["name"], "mime": d["mime"], "mode": d["mode"], "record": d["record"],
                                  "reviewed": d["reviewed"], "edits": d["edits"], "issues": issues(d)} for i, d in docs.items()])
@@ -514,6 +658,54 @@ def export_csv(year):
     for g in a["plan"]["gaps"]:
         w.writerow([g])
     return out.getvalue()
+
+
+def export_dossier(year):
+    import io, zipfile
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as z:
+        rep = audit(year)
+        ag = agent_review(year)
+        you = state["plants"][YOU]
+        dossier_data = {
+            "dossier_type": "CBAM_ACCREDITED_VERIFIER_AUDIT_DOSSIER",
+            "regulatory_framework": "Regulation (EU) 2023/956 & Implementing Regulation (EU) 2025/2621",
+            "installation": you["name"],
+            "reporting_year": year,
+            "report_summary": rep.get("summary"),
+            "audit_rows": rep.get("rows"),
+            "plant_review": rep.get("review"),
+            "open_checks": rep.get("checks"),
+            "monitoring_plan_gaps": rep.get("plan", {}).get("gaps"),
+            "review_agent_audit": ag
+        }
+        z.writestr("cbam_audit_trail.json", json.dumps(dossier_data, indent=2))
+        z.writestr("cbam_supplier_communication.csv", export_csv(year))
+
+        meth = [
+            "CBAM INSTALLATION MONITORING METHODOLOGY",
+            f"Installation: {you['name']}",
+            f"Reporting Year: {year}",
+            "Applicable Goods: Fasteners (CN 7318: Screws, Bolts, Nuts)",
+            "",
+            "1. Calculation Standard:",
+            "  Specific Embedded Emissions (SEE) = Direct Emissions (Furnaces) + Precursor Emissions (Wire Rod)",
+            "  LPG Direct Emission Factor: 2.985 tCO2/t",
+            "  Diesel Direct Emission Factor: 3.186 tCO2/t (Density: 0.84 kg/L)",
+            "  Non-Alloy Steel Wire Rod Default (CN 7213): 4.27 tCO2/t",
+            "  Alloy Steel Wire Rod Default (CN 7227): 7.30 tCO2/t",
+            "",
+            "2. Specific Rules & Boundaries Applied:"
+        ]
+        meth += [f"  - {line}" for line in rep.get("method", [])]
+        z.writestr("monitoring_methodology.txt", "\n".join(meth) + "\n")
+
+        # Primary Evidence Documents
+        for doc_id, d in docs.items():
+            raw_bytes = d["raw"] if isinstance(d["raw"], bytes) else d["raw"].encode("utf-8", "replace")
+            z.writestr(f"evidence_documents/{d['name']}", raw_bytes)
+
+    return buf.getvalue()
 
 
 if __name__ == "__main__":

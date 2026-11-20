@@ -80,6 +80,43 @@ def test_csv_and_document_download():
     assert code == 200 and isinstance(raw, bytes) and ctype.startswith("text/plain")
 
 
+def test_verifier_dossier_zip_export():
+    import io, zipfile
+    reset()
+    call("POST", "/api/demo")
+    code, data, ctype, headers = call("GET", "/api/dossier", {"year": "2027"})
+    assert code == 200 and ctype == "application/zip"
+    assert isinstance(data, bytes) and data.startswith(b"PK")
+    with zipfile.ZipFile(io.BytesIO(data), "r") as z:
+        names = z.namelist()
+        assert "cbam_audit_trail.json" in names
+        assert "cbam_supplier_communication.csv" in names
+        assert "monitoring_methodology.txt" in names
+        assert any(n.startswith("evidence_documents/") for n in names)
+
+
+def test_agent_review_endpoint():
+    reset()
+    # Empty plant
+    code, data, _, _ = call("GET", "/api/agent/review", {"year": "2027"})
+    assert code == 200 and data["empty"] and len(data["questions"]) > 0
+
+    # Populated plant
+    call("POST", "/api/demo")
+    call("POST", "/api/review_all")
+    code, data, _, _ = call("GET", "/api/agent/review", {"year": "2027"})
+    assert code == 200 and not data["empty"]
+    assert round(data["tco2_per_tonne"], 2) == 4.38
+    assert len(data["fixes"]) >= 2
+    top = data["fixes"][0]
+    assert "Rayalaseema" in top["title"] and top["rank"] == 1
+    assert "660" in top["detail"] and "63%" in top["detail"]
+    assert data["question"] == "Do you maintain monthly fuel stock logs or only purchase invoices?"
+    assert data["tools_used"] == ["get_readiness", "get_documents", "get_plant", "draft_mill_request"]
+    assert data["draft_email"] and data["draft_email"]["mill"] == "Rayalaseema Steel Rolling"
+    assert "RSR-24-0412" in data["draft_email"]["email"]
+
+
 def test_static_files_stay_inside_docs():
     assert server.static_path("/") .endswith(os.path.join("docs", "index.html"))
     assert server.static_path("/app.html").endswith(os.path.join("docs", "app.html"))

@@ -2,9 +2,17 @@
 
 # India default for non-alloy wire rod (CN 7213), direct emissions, tCO2 per tonne, before the mark-up.
 # Source: Implementing Regulation (EU) 2025/2621, Annex I (India), as corrected by 2026/1740. Checked on EUR-Lex, 13 Nov 2026.
-# shortcut: one value for all steel. Alloy wire rod (CN 7227) is 7.30, so alloy-steel bolts need a second value.
+# Non-alloy wire rod (CN 7213): 4.27, Alloy wire rod (CN 7227): 7.30
 DEFAULT_PRECURSOR_SEE = 4.27
+PRECURSOR_DEFAULTS = {"7213": 4.27, "7227": 7.30}
 EUA_PRICE = 75.0             # EUR per tCO2, assumed flat
+
+
+def precursor_see(cn=None):
+    code = "".join(ch for ch in str(cn or "") if ch.isdigit())
+    if code.startswith("7227"):
+        return PRECURSOR_DEFAULTS["7227"]
+    return PRECURSOR_DEFAULTS["7213"]
 
 # India defaults for the finished goods (total emissions, before the mark-up), same source as above.
 # An importer with no supplier data uses these. Keys are CN codes without spaces.
@@ -64,10 +72,11 @@ def compute(plant, suppliers, year=2027, price=EUA_PRICE):
     def precursor_total(y):
         tot = 0.0
         for name, heats in by_sup.items():
-            t = sum(h["tonnes"] for h in heats)
             sup = suppliers.get(name)
-            see = sup["see"] if sup and sup["verified"] else DEFAULT_PRECURSOR_SEE * (1 + markup(y))
-            tot += t * see
+            for h in heats:
+                t = h["tonnes"]
+                see = sup["see"] if sup and sup["verified"] else precursor_see(h.get("cn")) * (1 + markup(y))
+                tot += t * see
         return tot
 
     precursors = []
@@ -75,9 +84,13 @@ def compute(plant, suppliers, year=2027, price=EUA_PRICE):
         t = sum(h["tonnes"] for h in heats)
         sup = suppliers.get(name)
         actual = bool(sup and sup["verified"])
-        see = sup["see"] if actual else DEFAULT_PRECURSOR_SEE * (1 + markup(year))
+        is_alloy = any(str(h.get("cn") or "").startswith("7227") for h in heats)
+        base_dft = PRECURSOR_DEFAULTS["7227"] if is_alloy else PRECURSOR_DEFAULTS["7213"]
+        see = sup["see"] if actual else base_dft * (1 + markup(year))
+        tco2 = sum(h["tonnes"] * (sup["see"] if actual else precursor_see(h.get("cn")) * (1 + markup(year))) for h in heats)
+        cn = "7227" if is_alloy else "7213"
         precursors.append({"supplier": name, "tonnes": t, "basis": "actual" if actual else "default",
-                           "see": see, "tco2": t * see, "heats": heats,
+                           "see": see, "tco2": tco2, "heats": heats, "cn": cn,
                            "report": sup.get("report") if actual else None})
 
     def see_total(y):
